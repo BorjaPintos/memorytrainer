@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memoria de Intervalos Sonoros</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    select, input, button {
+      font-size: 16px;
+      margin: 10px;
+      padding: 6px;
+    }
+    #opciones {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    #opciones button {
+      width: 45%;
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #indicador {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #stats {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎵 Memoria de Intervalos Sonoros</h1>
+
+  <label>Dirección:
+    <select id="direccion">
+      <option value="asc">Ascendentes</option>
+      <option value="desc">Descendentes</option>
+      <option value="ambos">Ambos</option>
+    </select>
+  </label>
+
+  <label>Nota base:
+    <select id="nota-base">
+      <option value="440">A4 (440Hz)</option>
+      <option value="aleatorio">Aleatoria</option>
+    </select>
+  </label>
+    <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  <br>
+  <button id="btn-escuchar" onclick="iniciarJuego()">🎧 Escuchar</button>
+
+  <div id="indicador">🎵 Pulsa Escuchar para jugar</div>
+
+  <div id="opciones"></div>
+
+  <div id="stats">
+    <p>🎯 Aciertos: <span id="aciertos">0</span> / <span id="intentos">0</span></p>
+
+  </div>
+  
+    <button onclick="resetJuego()">🔁 Reset</button>
+
+  <script>
+    const INTERVALOS = [
+      "Segunda menor", "Segunda mayor", "Tercera menor", "Tercera mayor",
+      "Cuarta justa", "Tritono", "Quinta justa", "Sexta menor",
+      "Sexta mayor", "Séptima menor", "Séptima mayor", "Octava justa"
+    ];
+
+    let tonoInicial = 0;
+    let tonoFinal = 0;
+    let contexto = new (window.AudioContext || window.webkitAudioContext)();
+    let intervaloReal = 0;
+    let aciertos = 0;
+    let intentos = 0;
+    let tiempoIniciado = false;
+    let tiempoInicio;
+    let cronometro;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const contenedor = document.getElementById("opciones");
+      for (let i = 0; i < INTERVALOS.length; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = INTERVALOS[i];
+        btn.disabled = true;
+        btn.onclick = () => comprobarRespuesta(i + 1);
+        contenedor.appendChild(btn);
+      }
+    });
+
+    function iniciarJuego() {
+      desactivarBotones();
+      document.getElementById("btn-escuchar").disabled = true;
+      document.getElementById("indicador").textContent = "👂 Atento al sonido...";
+	  document.getElementById("indicador").style.color = "black";
+
+      const cantidad = 2;
+      const direccion = document.getElementById('direccion').value;
+      const baseSeleccion = document.getElementById('nota-base').value;
+
+      let base = 440;
+      if (baseSeleccion === 'aleatorio') {
+        const minSemitono = -12;
+        const maxSemitono = 12;
+        const aleatorioSemitonos = Math.floor(Math.random() * (maxSemitono - minSemitono + 1)) + minSemitono;
+        base = 440 * Math.pow(2, aleatorioSemitonos / 12);
+      }
+      tonoInicial = base;
+
+      intervaloReal = Math.floor(Math.random() * 12) + 1;
+      const esAscendente = direccion === 'asc' || (direccion === 'ambos' && Math.random() > 0.5);
+      tonoFinal = esAscendente
+        ? base * Math.pow(2, intervaloReal / 12)
+        : base / Math.pow(2, intervaloReal / 12);
+
+      const delay = 0.6;
+      for (let i = 0; i < cantidad; i++) {
+        const freq = i === 0 ? tonoInicial : tonoFinal;
+        reproducirTono(freq, contexto.currentTime + i * delay);
+      }
+
+      setTimeout(() => {
+        activarBotones();
+        document.getElementById("indicador").textContent = "❓ ¿Qué intervalo era?";
+      }, delay * cantidad * 1000);
+
+      intentos++;
+      actualizarStats();
+
+      if (!tiempoIniciado) {
+        tiempoIniciado = true;
+        tiempoInicio = Date.now();
+        cronometro = setInterval(() => {
+          const ahora = Date.now();
+          const s = Math.floor((ahora - tiempoInicio) / 1000);
+          const min = String(Math.floor(s / 60)).padStart(2, '0');
+          const sec = String(s % 60).padStart(2, '0');
+          document.getElementById("cronometro").textContent = `${min}:${sec}`;
+        }, 1000);
+      }
+    }
+
+    function activarBotones() {
+      document.querySelectorAll('#opciones button').forEach(btn => btn.disabled = false);
+    }
+
+    function desactivarBotones() {
+      document.querySelectorAll('#opciones button').forEach(btn => btn.disabled = true);
+    }
+
+    function reproducirTono(frecuencia, cuando) {
+      const osc = contexto.createOscillator();
+      const gain = contexto.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frecuencia, contexto.currentTime);
+      gain.gain.setValueAtTime(0.2, contexto.currentTime);
+      osc.connect(gain);
+      gain.connect(contexto.destination);
+      osc.start(cuando);
+      osc.stop(cuando + 0.5);
+    }
+
+    function comprobarRespuesta(seleccionado) {
+      const mensaje = document.getElementById("indicador");
+      if (seleccionado === intervaloReal) {
+        mensaje.textContent = "✅ ¡Correcto!";
+        mensaje.style.color = "green";
+        aciertos++;
+      } else {
+        mensaje.textContent = `❌ Incorrecto. Era ${INTERVALOS[intervaloReal - 1]}`;
+        mensaje.style.color = "red";
+      }
+      actualizarStats();
+      document.getElementById("btn-escuchar").disabled = false;
+      desactivarBotones();
+    }
+
+    function actualizarStats() {
+      document.getElementById("aciertos").textContent = aciertos;
+      document.getElementById("intentos").textContent = intentos;
+    }
+	
+	function resetJuego() {
+      const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+	  if (!confirmar) return;
+      location.reload();
+    }
+  </script>
+
+</body>
+</html>
