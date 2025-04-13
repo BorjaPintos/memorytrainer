@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memoria Visual</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #config {
+      margin-bottom: 20px;
+    }
+    #game-area {
+      width: 600px;
+      height: 400px;
+      margin: 0 auto;
+      background-color: #f2f2f2;
+      position: relative;
+      border: 2px solid #ccc;
+    }
+    .point {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #4287f5;
+      color: white;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .hidden {
+      background-color: #bbb;
+      color: transparent;
+      cursor: pointer;
+	  text-shadow: none;
+      pointer-events: auto; /* seguir permitiendo clic */
+    }
+	.hidden::selection {
+	  background: none;
+	}
+    .correct {
+      background-color: green !important;
+    }
+    .wrong {
+      background-color: red !important;
+    }
+	/* Bloquea selección de texto en todo */
+	body, #game-area, .point {
+	  user-select: none;
+	  -webkit-user-select: none; /* Safari */
+	  -moz-user-select: none;    /* Firefox */
+	  -ms-user-select: none;     /* IE/Edge */
+	}
+	button:disabled {
+	  opacity: 0.5;
+	  cursor: not-allowed;
+	}
+	button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>👁️👁️ 🎯 Memoria Visual: Clic en orden </h1>
+
+  <div id="config">
+    <label>Número de puntos:
+      <input type="number" id="num-points" value="5" min="2">
+    </label>
+	</br>
+    <label>Segundos visibles:
+      <input type="number" id="view-time" value="3" min="1">
+    </label>
+  </div>
+  <button id="start-btn" onclick="startGame()">Mostrar Números</button>
+  <div id="mensaje-dificultad" style="margin-top: 10px; font-size: 16px; color: orange;"></div>
+
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  </br>
+  <div id="game-area"></div>
+
+  <p id="feedback" style="min-height: 1.5em;">Pulsa 'Mostrar Números' para empezar a jugar</p>
+  <div id="stats" style="margin-top: 10px; font-size: 16px;">
+	<p>✅ Secuencias perfectas: 0 / 0</p>
+	<p>🎯 Aciertos por clic: 0 / 0 </p>
+  </div>
+	<button onclick="resetFullSession()">Reset</button>
+
+
+  <script>
+    let points = [];
+    let expected = 1;
+    let clickable = false;
+	let totalJuegos = 0;
+	let secuenciasPerfectas = 0;
+	let totalClicks = 0;
+	let aciertosClick = 0;
+	let huboFalloEnEstaSecuencia = false;
+	let tiempoIniciado = false;
+	let inicioTiempo = null;
+	let cronometroInterval = null;
+	let rachaPerfecta = 0;
+	let configInicial = { puntos: 5, segundos: 3 };
+
+
+
+    function startGame() {
+
+	  resetGameBoard();
+
+	  if (!tiempoIniciado) {
+		tiempoIniciado = true;
+		inicioTiempo = Date.now();
+		iniciarCronometro();
+	  }
+
+      
+      const numPoints = parseInt(document.getElementById('num-points').value);
+      const viewTime = parseInt(document.getElementById('view-time').value) * 1000;
+
+      const gameArea = document.getElementById('game-area');
+
+	  // Detectar si el usuario ha cambiado la configuración
+	  if (
+	    numPoints !== configInicial.puntos ||
+	    viewTime !== configInicial.segundos
+	  ) {
+	    rachaPerfecta = 0;
+	    document.getElementById('mensaje-dificultad').textContent = '';
+	    configInicial = { puntos: numPoints, segundos: viewTime };
+	  }
+
+      points = [];
+
+      for (let i = 1; i <= numPoints; i++) {
+		  const point = document.createElement('div');
+		  point.classList.add('point');
+		  point.textContent = i;
+		  point.dataset.number = i;
+
+		  let x, y;
+		  let maxLeft = gameArea.clientWidth - 40;
+		  let maxTop = gameArea.clientHeight - 40;
+		  let attempts = 0;
+		  let overlapping;
+
+		  do {
+			overlapping = false;
+			x = Math.floor(Math.random() * maxLeft);
+			y = Math.floor(Math.random() * maxTop);
+
+			for (const other of points) {
+			  const dx = x - parseInt(other.style.left);
+			  const dy = y - parseInt(other.style.top);
+			  const distance = Math.sqrt(dx * dx + dy * dy);
+			  if (distance < 45) { // separación mínima entre círculos (radio 20 + margen)
+				overlapping = true;
+				break;
+			  }
+			}
+
+			attempts++;
+			if (attempts > 100) break; // para evitar bucles infinitos si no hay espacio
+
+		  } while (overlapping);
+
+		  point.style.left = `${x}px`;
+		  point.style.top = `${y}px`;
+
+		  point.addEventListener('click', () => handleClick(point));
+		  points.push(point);
+		  gameArea.appendChild(point);
+		
+
+      }
+
+	  document.getElementById('start-btn').disabled = true;
+
+	  document.getElementById('feedback').textContent = '🧠 ¡Memoriza los números!';
+
+      // Ocultar números tras Y segundos
+      setTimeout(() => {
+        points.forEach(p => p.classList.add('hidden'));
+        clickable = true;
+		document.getElementById('feedback').textContent = '🔍 ¿Dónde está el número 1?';
+        expected = 1;
+      }, viewTime);
+	  
+	  totalJuegos++;
+	  huboFalloEnEstaSecuencia = false;
+	  updateStats();
+
+    }
+
+	function handleClick(point) {
+	  if (!clickable) return;
+
+	  const clickedNumber = parseInt(point.dataset.number);
+
+	  // Ya fue acertado antes
+	  if (point.classList.contains('correct')) return;
+
+	  totalClicks++;
+
+	  if (clickedNumber === expected) {
+		aciertosClick++;
+
+		point.classList.remove('hidden', 'wrong');
+		point.classList.add('correct');
+		point.textContent = clickedNumber;
+		expected++;
+
+		if (expected > points.length) {
+		  // Si no hubo fallos en esta secuencia, cuenta como perfecta
+		  if (!huboFalloEnEstaSecuencia) {
+			secuenciasPerfectas++;
+			rachaPerfecta++;
+			if (rachaPerfecta >= 5) {
+			   document.getElementById('mensaje-dificultad').textContent = '🔥 ¡Estás preparado para subir la dificultad!';
+			}
+		  } else {
+		    rachaPerfecta = 0;
+		  }
+		  document.getElementById('feedback').textContent = "✅ ¡Secuencia completada!";
+
+		  clickable = false;
+
+		  // ✅ Volver a habilitar botón
+		  document.getElementById('start-btn').disabled = false;
+		} else {
+		  document.getElementById('feedback').textContent = `Bien. Ahora el ${expected}`;
+		}
+
+	  } else {
+		point.classList.remove('hidden');
+		point.classList.add('wrong');
+		point.textContent = "";
+		huboFalloEnEstaSecuencia = true;
+		document.getElementById('feedback').textContent = `❌ Ups... ese no era el ${expected}, sigue buscando`;
+	  }
+
+	  updateStats();
+	}
+
+
+
+
+	function resetFullSession() {
+	  const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+      if (!confirmar) return;
+	  document.getElementById('game-area').innerHTML = '';
+	  document.getElementById('feedback').textContent = "Pulsa 'Mostrar Números' para empezar a jugar";
+	  document.getElementById('stats').innerHTML = `
+		<p>✅ Secuencias perfectas: 0 / 0</p>
+		<p>🎯 Aciertos por clic: 0 / 0 </p>
+	  `;
+	  document.getElementById('cronometro').textContent = `00:00`;
+
+	  points = [];
+	  expected = 1;
+	  clickable = false;
+
+	  // Resetear estadísticas y cronómetro
+	  totalJuegos = 0;
+	  secuenciasPerfectas = 0;
+	  totalClicks = 0;
+	  aciertosClick = 0;
+	  tiempoIniciado = false;
+	  inicioTiempo = null;
+
+	  clearInterval(cronometroInterval);
+	  cronometroInterval = null;
+	  document.getElementById('start-btn').disabled = false;
+	  rachaPerfecta = 0;
+	  document.getElementById('mensaje-dificultad').textContent = '';
+	}
+
+	function resetGameBoard() {
+	  document.getElementById('game-area').innerHTML = '';
+	  document.getElementById('feedback').textContent = '';
+	  points = [];
+	  expected = 1;
+	  clickable = false;
+	  document.getElementById('start-btn').disabled = false;
+	}
+
+
+	
+	function updateStats() {
+	  document.getElementById('stats').innerHTML = `
+		<p>✅ Secuencias perfectas: ${secuenciasPerfectas} / ${totalJuegos}</p>
+		<p>🎯 Aciertos por clic: ${aciertosClick} / ${totalClicks}</p>
+	  `;
+	}
+	
+	function iniciarCronometro() {
+	  cronometroInterval = setInterval(() => {
+		const ahora = Date.now();
+		const segundos = Math.floor((ahora - inicioTiempo) / 1000);
+		const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+		const sec = String(segundos % 60).padStart(2, '0');
+		document.getElementById('cronometro').textContent = `${min}:${sec}`;
+	  }, 1000);
+	}
+
+  </script>
+
+</body>
+</html>

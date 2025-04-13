@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Piedra, Papel o Tijera - Memoria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .option {
+      display: inline-block;
+      margin: 10px;
+      font-size: 40px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .green {
+      border-color: green;
+    }
+    .hidden {
+      visibility: hidden;
+    }
+    .red {
+      border-color: red;
+    }
+    #stats {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    #mensaje {
+      font-size: 22px;
+      margin: 10px 0;
+    }
+    #mensaje-dificultad {
+      color: orange;
+      font-size: 18px;
+      margin: 8px 0;
+    }
+    button {
+      margin-top: 10px;
+      font-size: 16px;
+      padding: 8px 16px;
+    }
+    input {
+      margin: 5px;
+      width: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>✊, ✋ o ✌ - Memoria</h1>
+
+  <label>Manos contra las que competir:
+    <input type="number" id="num-manos" value="3" min="1">
+  </label></br>
+  <label>Segundos visibles:
+    <input type="number" id="tiempo-visible" value="3" min="1">
+  </label>
+  <br>
+  <div id="mensaje-dificultad"></div>
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  <button id="btn-iniciar" onclick="iniciarJuego()">Iniciar</button>
+  
+
+  <div id="zona-juego" style="margin: 20px; min-height: 70px;"></div>
+  <div id="mensaje">Pulsa Iniciar para empezar el juego</div>
+
+
+  <div>
+    <button class="boton-opcion" onclick="seleccionar('piedra')">✊ Piedra</button>
+    <button class="boton-opcion" onclick="seleccionar('papel')">✋ Papel</button>
+    <button class="boton-opcion" onclick="seleccionar('tijera')">✌️ Tijera</button>
+  </div>
+
+  <div id="stats">
+    <p>✅ Partidas perfectas: <span id="perfectas">0</span> / <span id="jugadas">0</span></p>
+    <p>🎯 Aciertos por clic: <span id="aciertos">0</span> / <span id="clics">0</span></p>
+    
+  </div>
+<button onclick="resetJuego()">Reset</button>
+  <script>
+    const opciones = ['piedra', 'papel', 'tijera'];
+    const iconos = {
+      piedra: '✊',
+      papel: '✋',
+      tijera: '✌️'
+    };
+
+    let secuencia = [];
+    let modo = [];
+    let indice = 0;
+    let aciertos = 0;
+    let clics = 0;
+    let perfectas = 0;
+    let jugadas = 0;
+    let huboFallo = false;
+    let tiempoIniciado = false;
+    let tiempoInicio;
+    let cronometro;
+    let puedeSeleccionar = false;
+    let rachaPerfectas = 0;
+    let ultimaConfig = { manos: 3, tiempo: 3 };
+
+    function iniciarJuego() {
+      if (!puedeSeleccionar && secuencia.length > 0 && indice < secuencia.length) return;
+
+      const cantidad = parseInt(document.getElementById('num-manos').value);
+      const tiempo = parseInt(document.getElementById('tiempo-visible').value) * 1000;
+
+      if (cantidad !== ultimaConfig.manos || tiempo !== ultimaConfig.tiempo * 1000) {
+        rachaPerfectas = 0;
+        document.getElementById("mensaje-dificultad").textContent = '';
+        ultimaConfig = { manos: cantidad, tiempo: tiempo / 1000 };
+      }
+
+      secuencia = [];
+      modo = [];
+      indice = 0;
+      huboFallo = false;
+      puedeSeleccionar = false;
+      actualizarMensaje('🧠 ¡Memoriza!');
+
+      const zona = document.getElementById('zona-juego');
+      zona.innerHTML = '';
+
+      for (let i = 0; i < cantidad; i++) {
+        const o = opciones[Math.floor(Math.random() * 3)];
+        secuencia.push(o);
+        modo.push(Math.random() > 0.5 ? 'ganar' : 'perder');
+
+        const span = document.createElement('span');
+        span.textContent = iconos[o];
+        span.className = 'option';
+        span.id = `mano-${i}`;
+        zona.appendChild(span);
+      }
+
+      document.getElementById("btn-iniciar").disabled = true;
+
+      setTimeout(() => {
+        for (let i = 0; i < cantidad; i++) {
+          document.getElementById(`mano-${i}`).classList.add('hidden');
+        }
+        actualizarMensaje(`💡 Tu objetivo: ${modo[0]}`);
+        puedeSeleccionar = true;
+      }, tiempo);
+
+      jugadas++;
+      actualizarStats();
+
+      if (!tiempoIniciado) {
+        tiempoIniciado = true;
+        tiempoInicio = Date.now();
+        cronometro = setInterval(() => {
+          const ahora = Date.now();
+          const s = Math.floor((ahora - tiempoInicio) / 1000);
+          const min = String(Math.floor(s / 60)).padStart(2, '0');
+          const sec = String(s % 60).padStart(2, '0');
+          document.getElementById("cronometro").textContent = `${min}:${sec}`;
+        }, 1000);
+      }
+    }
+
+    function seleccionar(eleccion) {
+      if (!puedeSeleccionar || indice >= secuencia.length) return;
+      clics++;
+
+      const actual = secuencia[indice];
+      const condicion = modo[indice];
+      let correcto = false;
+
+      if (condicion === 'ganar') {
+        correcto = (eleccion === 'papel' && actual === 'piedra') ||
+                   (eleccion === 'tijera' && actual === 'papel') ||
+                   (eleccion === 'piedra' && actual === 'tijera');
+      } else {
+        correcto = (eleccion === 'piedra' && actual === 'papel') ||
+                   (eleccion === 'papel' && actual === 'tijera') ||
+                   (eleccion === 'tijera' && actual === 'piedra');
+      }
+
+      if (correcto) {
+        document.getElementById(`mano-${indice}`).classList.remove('hidden');
+        document.getElementById(`mano-${indice}`).classList.add('green');
+        aciertos++;
+        indice++;
+
+        if (indice < secuencia.length) {
+          actualizarMensaje(`💡 Tu objetivo: ${modo[indice]}`);
+        } else {
+          if (!huboFallo) {
+            perfectas++;
+            rachaPerfectas++;
+            if (rachaPerfectas >= 5) {
+              document.getElementById("mensaje-dificultad").textContent = '🔥 ¡Estás preparado para subir la dificultad!';
+            }
+          } else {
+            rachaPerfectas = 0;
+            document.getElementById("mensaje-dificultad").textContent = '';
+          }
+          actualizarMensaje('✅ ¡Secuencia completada!');
+          puedeSeleccionar = false;
+          document.getElementById("btn-iniciar").disabled = false;
+        }
+      } else {
+        huboFallo = true;
+        rachaPerfectas = 0;
+        document.getElementById("mensaje-dificultad").textContent = '';
+        actualizarMensaje(`❌ Incorrecto. Tu objetivo sigue siendo: ${modo[indice]}`);
+      }
+
+      actualizarStats();
+    }
+
+    function actualizarMensaje(txt) {
+      document.getElementById('mensaje').textContent = txt;
+    }
+
+    function actualizarStats() {
+      document.getElementById('perfectas').textContent = perfectas;
+      document.getElementById('jugadas').textContent = jugadas;
+      document.getElementById('aciertos').textContent = aciertos;
+      document.getElementById('clics').textContent = clics;
+    }
+
+    function resetJuego() {
+	 const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+	  if (!confirmar) return;
+      location.reload();
+    }
+  </script>
+
+</body>
+</html>

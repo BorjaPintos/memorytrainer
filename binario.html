@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memoria Binaria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    #number-display {
+      font-size: 36px;
+      margin: 20px;
+      height: 80px;
+      line-height: 60px;
+    }
+    #config {
+      margin-bottom: 20px;
+    }
+    #resultado {
+      min-height: 1.5em;
+      font-size: 18px;
+    }
+    .stats {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+    }
+    input {
+      margin: 10px;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .green { color: green; }
+    .red { color: red; }
+  </style>
+</head>
+<body>
+
+  <h1>🤖 Memoria Binaria</h1>
+  <div id="config">
+    <label>Segmentos (ej: 1 1, 2 3):
+      <input type="text" id="segments" value="1 1">
+    </label><br>
+
+    <label>Segundos que se muestra:
+      <input type="number" id="display-time" value="3" min="1">
+    </label><br>
+  </div>
+
+  <div id="mensaje-dificultad" style="margin-top: 10px; font-size: 18px; color: orange;"></div>
+
+  <div class="stats">
+    <p>🕓 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  </div>
+
+  <div id="number-display"></div>
+
+  <label>Tu respuesta:
+    <input type="text" id="user-input">
+  </label><br>
+
+  <button id="mostrar-btn" onclick="generarNumero()">Mostrar binario</button>
+  <button id="check" onclick="mostrarOriginal()" disabled>Check</button>
+
+  <p id="resultado">Pulsa Mostrar Binario para empezar a jugar</p>
+
+  <div class="stats">
+    <p>🎯 Aciertos: <span id="aciertos">0</span> / <span id="intentos">0</span></p>
+  </div>
+
+  <button onclick="resetearTodo()">Reset</button>
+
+  <script>
+    let segmentosActivos = [];
+    let numeroOriginal = "";
+    let numeroFormateado = "";
+
+    let aciertos = 0;
+    let intentos = 0;
+    let tiempoIniciado = false;
+    let tiempoInicio = null;
+    let cronometroInterval = null;
+
+    let rachaAciertos = 0;
+    let ultimaConfig = { segmentos: "", tiempo: 0 };
+
+    function generarNumero() {
+      const segmentoStr = document.getElementById("segments").value.trim();
+      const displayTimeValue = parseInt(document.getElementById("display-time").value);
+
+      if (
+        segmentoStr !== ultimaConfig.segmentos ||
+        displayTimeValue !== ultimaConfig.tiempo
+      ) {
+        rachaAciertos = 0;
+        document.getElementById("mensaje-dificultad").textContent = '';
+        ultimaConfig = { segmentos: segmentoStr, tiempo: displayTimeValue };
+      }
+
+      const segmentos = segmentoStr.split(" ").map(s => parseInt(s)).filter(n => !isNaN(n) && n > 0);
+      segmentosActivos = [...segmentos];
+      const tiempo = displayTimeValue * 1000;
+
+      if (segmentos.length === 0) {
+        alert("Debes introducir al menos un segmento válido.");
+        return;
+      }
+
+      if (!tiempoIniciado) {
+        iniciarCronometro();
+      }
+
+      numeroOriginal = "";
+      numeroFormateado = "";
+
+      for (let i = 0; i < segmentos.length; i++) {
+        let binLength = segmentos[i] * 4;
+        let binario = "";
+        for (let j = 0; j < binLength; j++) {
+          binario += Math.random() > 0.5 ? "1" : "0";
+        }
+        numeroOriginal += binario;
+        numeroFormateado += binario + " ";
+      }
+
+      document.getElementById("number-display").textContent = numeroFormateado.trim();
+      document.getElementById("user-input").disabled = true;
+      document.getElementById("check").disabled = true;
+      document.getElementById("resultado").textContent = '🧠 ¡Memoriza los bits!';
+      resultado.style.color = "black";
+
+      setTimeout(() => {
+        document.getElementById("number-display").textContent = "";
+        document.getElementById("user-input").disabled = false;
+        document.getElementById("check").disabled = false;
+        document.getElementById("resultado").textContent = '🔍 ¿Cuál era la secuencia binaria?';
+        resultado.style.color = "black";
+      }, tiempo);
+
+      document.getElementById("user-input").value = "";
+      document.getElementById("mostrar-btn").disabled = true;
+    }
+
+    function mostrarOriginal() {
+      const userValue = document.getElementById("user-input").value.replace(/\s+/g, '');
+      const resultado = document.getElementById("resultado");
+      intentos++;
+
+      let html = '';
+      let index = 0;
+      for (let seg of segmentosActivos) {
+        for (let i = 0; i < seg * 4; i++) {
+          const charOriginal = numeroOriginal[index];
+          const charUsuario = userValue[index] || '';
+
+          if (charOriginal === charUsuario) {
+            html += `<span class="green">${charOriginal}</span>`;
+          } else {
+            html += `<span class="red">${charOriginal}</span>`;
+          }
+          index++;
+        }
+        html += ' ';
+      }
+
+      document.getElementById("number-display").innerHTML = html.trim();
+
+      if (userValue === numeroOriginal) {
+        aciertos++;
+        rachaAciertos++;
+        resultado.textContent = "✅ ¡Correcto!";
+        resultado.style.color = "green";
+
+        if (rachaAciertos >= 5) {
+          document.getElementById("mensaje-dificultad").textContent = '🔥 ¡Estás preparado para subir la dificultad!';
+        }
+
+      } else {
+        resultado.textContent = `❌ Incorrecto`;
+        resultado.style.color = "red";
+        rachaAciertos = 0;
+        document.getElementById("mensaje-dificultad").textContent = '';
+      }
+
+      document.getElementById("aciertos").textContent = aciertos;
+      document.getElementById("intentos").textContent = intentos;
+
+      document.getElementById("user-input").disabled = true;
+      document.getElementById("check").disabled = true;
+      document.getElementById("mostrar-btn").disabled = false;
+    }
+
+    function iniciarCronometro() {
+      tiempoIniciado = true;
+      tiempoInicio = Date.now();
+      cronometroInterval = setInterval(() => {
+        const ahora = Date.now();
+        const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+        const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+        const sec = String(segundos % 60).padStart(2, '0');
+        document.getElementById("cronometro").textContent = `${min}:${sec}`;
+      }, 1000);
+    }
+
+    function resetearTodo() {
+      const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+      if (!confirmar) return;
+      numeroOriginal = "";
+      numeroFormateado = "";
+      aciertos = 0;
+      intentos = 0;
+      tiempoIniciado = false;
+      clearInterval(cronometroInterval);
+      document.getElementById("cronometro").textContent = "00:00";
+      document.getElementById("aciertos").textContent = "0";
+      document.getElementById("intentos").textContent = "0";
+      document.getElementById("number-display").textContent = "";
+      document.getElementById("user-input").value = "";
+      document.getElementById("resultado").textContent = "Pulsa Mostrar Binario para empezar a jugar";
+      resultado.style.color = "black";
+      rachaAciertos = 0;
+      document.getElementById("mensaje-dificultad").textContent = '';
+      document.getElementById("mostrar-btn").disabled = false;
+      document.getElementById("check").disabled = true;
+    }
+  </script>
+
+</body>
+</html>

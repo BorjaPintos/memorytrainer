@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Instrucciones - Entrenador de Memoria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      max-width: 800px;
+      margin: auto;
+      background-color: #fefefe;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: #2b5dab;
+      margin-top: 30px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+
+    .icon {
+      font-size: 24px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📖 Manual de Instrucciones</h1>
+
+  <p>Este entrenador de memoria contiene dos juegos diseñados para ejercitar diferentes habilidades mentales. A continuación encontrarás una guía rápida de cada uno.</p>
+
+  <h2>🔢 Memoria Numérica</h2>
+  <ul>
+    <li>Se muestra un número compuesto por varios segmentos (por ejemplo: <code>2 2 3</code>).</li>
+    <li>Tienes unos segundos para memorizarlo.</li>
+    <li>Después, el número desaparece y deberás escribirlo exactamente como lo recuerdas.</li>
+  <li>Al pulsar <strong>Check</strong>, los bits se vuelven a mostrar:
+    <ul>
+      <li>🟢 En <span style="color:green">verde</span> los acertados</li>
+      <li>🔴 En <span style="color:red">rojo</span> los fallados</li>
+    </ul>
+  </li>
+  <li>El sistema cuenta:
+    <ul>
+      <li>🎯 Aciertos totales</li>
+      <li>🕒 Tiempo total jugado</li>
+      <li>🔥 Racha de secuencias correctas (si haces 5 seguidas, se te sugerirá aumentar la dificultad)</li>
+    </ul>
+  </li>
+  </ul>
+  <h2>🤖 Memoria Binaria</h2>
+  <ul>
+  <li>Se muestra una secuencia de <strong>dígitos binarios</strong> (0 y 1) durante unos segundos.</li>
+  <li>La longitud de la secuencia depende de los <strong>segmentos</strong> que definas:
+    <ul>
+      <li>Cada unidad equivale a 4 bits. Por ejemplo, <code>1 2</code> mostrará <code>4 + 8 = 12</code> bits.</li>
+      <li>Estos segmentos aparecerán separados visualmente (como grupos).</li>
+    </ul>
+  </li>
+  <li>Una vez transcurrido el tiempo, la secuencia desaparece y el jugador debe escribirla de memoria.</li>
+  <li>Al pulsar <strong>Check</strong>, los bits se vuelven a mostrar:
+    <ul>
+      <li>🟢 En <span style="color:green">verde</span> los acertados</li>
+      <li>🔴 En <span style="color:red">rojo</span> los fallados</li>
+    </ul>
+  </li>
+  <li>El sistema cuenta:
+    <ul>
+      <li>🎯 Aciertos totales</li>
+      <li>🕒 Tiempo total jugado</li>
+      <li>🔥 Racha de secuencias correctas (si haces 5 seguidas, se te sugerirá aumentar la dificultad)</li>
+    </ul>
+  </li>
+</ul>
+  <h2>👁️👁️ 🎯 Memoria Visual: Clic en orden </h2>
+  <ul>
+    <li>Se mostrarán varios números distribuidos aleatoriamente en un área.</li>
+    <li>Tras unos segundos, los números desaparecen y quedan solo círculos grises.</li>
+    <li>Debes hacer clic en los círculos en el orden correcto (1 → 2 → 3...).</li>
+    <li>Si te equivocas, el círculo se vuelve rojo, pero puedes seguir intentando.</li>
+    <li>Se registran tus secuencias correctas y aciertos por clic.</li>
+    <li>Al lograr 5 secuencias perfectas, se te sugerirá subir la dificultad.</li>
+  </ul>
+  
+  <h2>🎶 🎯 Memorización de Notas</h2>
+  <ul>
+    <li>Se mostrará un <strong>pentagrama</strong> con una o varias notas musicales aleatorias durante unos segundos.</li>
+    <li>Tras ese tiempo, las notas desaparecen.</li>
+    <li>El jugador debe identificar cada nota pulsando los botones correspondientes en <strong>el mismo orden en que aparecieron</strong>.</li>
+    <li>Si acierta, la nota se revela en <span style="color:green;">verde</span>. Si antes falló pero luego acierta, aparecerá en <span style="color:orange;">naranja</span>.</li>
+    <li>Las <strong>líneas adicionales</strong> también desaparecen para no dar pistas.</li>
+    <li>No se puede iniciar una nueva secuencia hasta completar la actual (anti-trampa).</li>
+    <li>Se puede jugar en <strong>clave de Sol</strong>, <strong>clave de Fa</strong> o modo aleatorio (ambas).</li>
+    <li>Si logras 5 secuencias perfectas seguidas, aparecerá un mensaje que te anima a subir la dificultad 🔥.</li>
+    <li>Contadores activos:
+      <ul>
+        <li>⏱️ Tiempo total de juego</li>
+        <li>✅ Secuencias perfectas</li>
+        <li>🎯 Aciertos por clic</li>
+      </ul>
+    </li>
+  </ul>
+  <h2>✊, ✋ o ✌️ - Memoria</h2>
+<ul>
+  <li>Se mostrarán varias manos (✊ ✋ ✌️) durante unos segundos. El número de manos y el tiempo son configurables.</li>
+  <li>Cada mano tendrá un objetivo: <strong>ganar</strong> o <strong>perder</strong>.</li>
+  <li>Después de ocultarse las manos, deberás pulsar el botón correcto para lograr el objetivo indicado en cada paso.</li>
+  <li>Si aciertas, la mano aparecerá de nuevo con un borde <span style="color:green;">verde</span>.</li>
+  <li>Si fallas, verás un mensaje de error pero puedes seguir intentándolo hasta acertar esa mano.</li>
+  <li>Contadores incluidos:
+    <ul>
+      <li>✅ Partidas perfectas (sin fallos)</li>
+      <li>🎯 Aciertos por clic</li>
+      <li>⏱️ Tiempo total jugado</li>
+    </ul>
+  </li>
+  <li>🔐 Anti-trampas:
+    <ul>
+      <li>No puedes pulsar botones mientras las manos están visibles.</li>
+      <li>No puedes iniciar una nueva ronda hasta terminar la actual.</li>
+    </ul>
+  </li>
+  <li>🔥 Si consigues 5 partidas perfectas seguidas, se te sugiere subir la dificultad.</li>
+  <h2>🧑‍🤝‍🧑 Parejas</h2>
+<ul>
+  <li>Se muestran X parejas de cartas durante unos segundos (configurable).</li>
+  <li>Las cartas se ocultan y el jugador debe encontrar todas las parejas de memoria.</li>
+  <li>Solo se muestran nuevamente cuando se aciertan.</li>
+  <li>Si fallas, ambas cartas se vuelven a ocultar.</li>
+  <li>Contadores incluidos:
+    <ul>
+      <li>🎯 Secuencias perfectas (sin errores) / total de partidas</li>
+      <li>⏱️ Tiempo total jugado</li>
+    </ul>
+  </li>
+  <li>🔥 Si consigues 5 secuencias perfectas seguidas, se sugiere aumentar la dificultad.</li>
+</ul>
+
+</ul>
+  <h2>💡 Consejos</h2>
+  <ul>
+    <li>Empieza con una dificultad baja y ve aumentando progresivamente.</li>
+    <li>Practica al menos 5 minutos al día para notar mejoras.</li>
+    <li>Concéntrate en <em>visualizar mentalmente</em> y no en repetir en voz alta.</li>
+  </ul>
+
+  <a class="volver" href="index.html">⬅️ Volver al menú</a>
+
+</body>
+</html>

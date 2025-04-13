@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Entrenador de Memoria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+    }
+
+    .menu {
+      display: flex;
+      gap: 40px;
+    }
+
+    .card {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+      color: #333;
+      font-size: 18px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      background: #eaf4ff;
+    }
+
+    .card span {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Entrenador de Memoria</h1>
+
+  <div class="menu">
+    <a href="instrucciones.html" class="card">
+    <span>📘</span>
+    Instrucciones<br>
+    Tutorial
+  </a>
+    <a href="memoria1.html" class="card">
+      <span>🔢</span>
+      Memoria Numérica
+    </a>
+	<a href="binario.html" class="card">
+      <span>🤖</span>
+      Memoria Binaria
+    </a>
+    <a href="memoria2.html" class="card">
+      <span>👁️👁️  🎯</span>
+       Clic en orden 
+    </a>
+	<a href="musica.html" class="card">
+    <span>🎶 🎯 </span>
+    Memorización de Notas
+  </a>
+  <a href="piedrapapeltijeras.html" class="card">
+  <span>✊✋✌️</span>
+   Memoria
+  </a>
+  <a href="parejas.html" class="card">
+    <span>🧑‍🤝‍🧑</span>
+    Memoria de Parejas
+  </a>
+
+  </div>
+
+</body>
+</html>

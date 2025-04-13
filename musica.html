@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <title>Identificador de Notas Musicales</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+	#config {
+      margin-bottom: 20px;
+    }
+    #staff {
+      margin: 20px auto;
+      display: block;
+    }
+    .note-button {
+      padding: 10px 16px;
+      margin: 5px;
+      font-size: 18px;
+    }
+    #feedback {
+      font-size: 20px;
+      margin-top: 15px;
+      min-height: 1.5em;
+    }
+    select, button {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+	button:disabled {
+	  opacity: 0.5;
+	  cursor: not-allowed;
+	}
+
+	.bravura {
+		font-family: 'Noto Music', 'Segoe UI Symbol', 'Arial Unicode MS', serif;
+	}
+
+  </style>
+</head>
+<body>
+
+  <h1>🎶 🎯 Memorización de Notas</h1>
+
+  <div id="config">
+  <label>Clave:
+    <select id="clave">
+      <option value="sol">Clave de 𝄞</option>
+      <option value="fa">Clave de 𝄢</option>
+      <option value="ambas">Ambas</option>
+    </select>
+  </label><br>
+  <label>Número de notas:
+	<input type="number" id="cantidad-notas" value="3" min="1" style="width: 50px;">
+   </label><br>
+  <label>Segundos visibles:
+    <input type="number" id="tiempo-visible" value="3" min="1" style="width: 50px;">
+  </label><br>
+  <div>
+
+  <div id="mensaje-dificultad" style="margin-top: 10px; font-size: 16px; color: orange;"></div>
+
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+
+
+  <svg id="staff" width="300" height="200">
+    <!-- pentagrama -->
+    <g id="lineas-pentagrama"></g>
+
+    <text id="clave-sol" class="bravura" x="10" y="90" font-size="56" visibility="hidden">𝄞</text>
+	<text id="clave-fa" class="bravura" x="10" y="64" font-size="56" visibility="hidden">𝄢</text>
+	<!-- nota -->
+	<g id="grupo-notas"></g>
+
+	<!-- líneas adicionales -->
+	<g id="lineas-adicionales"></g>
+
+  </svg>
+
+  <div id="botonera">
+    <button class="note-button" onclick="comprobarNota('Do')">Do</button>
+    <button class="note-button" onclick="comprobarNota('Re')">Re</button>
+    <button class="note-button" onclick="comprobarNota('Mi')">Mi</button>
+    <button class="note-button" onclick="comprobarNota('Fa')">Fa</button>
+    <button class="note-button" onclick="comprobarNota('Sol')">Sol</button>
+    <button class="note-button" onclick="comprobarNota('La')">La</button>
+    <button class="note-button" onclick="comprobarNota('Si')">Si</button>
+  </div>
+  <button id="btn-iniciar" onclick="generarNota()">Iniciar</button>
+
+  <div id="feedback">Pulsa Iniciar para empezar a jugar</div>
+  <div id="estadisticas" style="margin-top: 20px; font-size: 16px;">
+	  <p>✅ Secuencias perfectas: <span id="secuenciasperfectas">0</span> / <span id="secuencias">0</span></p>
+	  <p>🎯 Aciertos por clic: <span id="aciertos">0</span> / <span id="clics">0</span></p>
+  </div>
+<button onclick="reiniciarTodo()">Reset</button>
+
+
+  <script>
+    const notasSol = [
+	  { nombre: 'Do', y: 120 },
+      { nombre: 'Re', y: 110 },
+      { nombre: 'Mi', y: 100 },
+	  { nombre: 'Fa', y: 90 },
+      { nombre: 'Sol', y: 80 },
+	  { nombre: 'La', y: 70 },
+      { nombre: 'Si', y: 60 },
+      { nombre: 'Do', y: 50 },
+      { nombre: 'Re', y: 40 },
+	  { nombre: 'Mi', y: 30 },
+	  { nombre: 'Fa', y: 20 },
+	  { nombre: 'Sol', y: 10 }
+    ];
+
+    const notasFa = [
+      { nombre: 'Si', y: 10 },
+	  { nombre: 'La', y: 20 },
+      { nombre: 'Sol', y: 30 },
+      { nombre: 'Fa', y: 40 },
+	  { nombre: 'Mi', y: 50},
+	  { nombre: 'Re', y: 60},
+	  { nombre: 'Do', y: 70 },
+	  { nombre: 'Si', y: 80 },
+	  { nombre: 'La', y: 90 },
+      { nombre: 'Sol', y: 100 },
+      { nombre: 'Fa', y: 110 },
+	  { nombre: 'Mi', y: 120},
+
+    ];
+    let rachaPerfecta = 0;
+    let ultimaConfig = { clave: "", cantidad: 0, tiempo: 0 };
+
+	let tiempoIniciado = false;
+	let tiempoInicio = null;
+	let cronometroInterval = null;
+
+	let totalAciertos = 0;
+	let totalClics = 0;
+	let secuenciasPerfectas = 0;
+	let nSecuencias = 0;
+	let huboFallosEnSecuencia = false;
+
+    let notasSecuencia = [];
+	let notasFalladas = [];
+
+	let indiceActual = 0;
+	let botonesHabilitados = false;
+
+
+    let claveActual = 'sol';
+
+    function generarNota() {
+	  document.getElementById("btn-iniciar").disabled = true;
+
+	  const botones = document.querySelectorAll(".note-button");
+	  botones.forEach(btn => btn.disabled = true);
+
+	  const claveSeleccionada  = document.getElementById("clave").value;
+	  const cantidad = parseInt(document.getElementById("cantidad-notas").value);
+	  const tiempoVisible = parseInt(document.getElementById("tiempo-visible").value) * 1000;
+	  
+	  if (
+		  claveSeleccionada  !== ultimaConfig.clave ||
+		  cantidad !== ultimaConfig.cantidad ||
+		  tiempoVisible !== ultimaConfig.tiempo
+		) {
+		  rachaPerfecta = 0;
+		  document.getElementById("mensaje-dificultad").textContent = '';
+		  ultimaConfig = {
+			clave: claveSeleccionada ,
+			cantidad: cantidad,
+			tiempo: tiempoVisible
+		  };
+		}
+	  
+	  
+	  
+	  notasFalladas = Array(cantidad).fill(false);
+
+	  let lista = [];
+
+	  if (claveSeleccionada  === "sol") {
+		claveActual = 'sol';
+		lista = notasSol;
+	  } else if (claveSeleccionada  === "fa") {
+		claveActual = 'fa';
+		lista = notasFa;
+	  } else {
+		claveActual = Math.random() > 0.5 ? 'sol' : 'fa';
+		lista = claveActual === 'sol' ? notasSol : notasFa;
+	  }
+
+	  document.getElementById("clave-sol").setAttribute("visibility", claveActual === 'sol' ? "visible" : "hidden");
+	  document.getElementById("clave-fa").setAttribute("visibility", claveActual === 'fa' ? "visible" : "hidden");
+
+	  // Generar secuencia de notas aleatorias
+	  notasSecuencia = [];
+	  for (let i = 0; i < cantidad; i++) {
+		const nota = lista[Math.floor(Math.random() * lista.length)];
+		notasSecuencia.push({ ...nota });
+	  }
+
+	  // Dibujar notas en SVG
+	  const grupo = document.getElementById("grupo-notas");
+	  grupo.innerHTML = "";
+	  const extraLinesGroup = document.getElementById("lineas-adicionales");
+	  extraLinesGroup.innerHTML = "";
+
+	  let startX = 60;
+	  	  
+      // Reposicionar claves para que no queden flotando a la izquierda
+	  document.getElementById("clave-sol").setAttribute("x", 10);
+	  document.getElementById("clave-fa").setAttribute("x", 10);
+	  
+	  notasSecuencia.forEach((nota, i) => {
+		const x = startX + i * 60;
+		const y = nota.y;
+
+		nota.x = x; // guarda x en el objeto para uso posterior
+		grupo.innerHTML += `<circle id="nota-${i}" cx="${x}" cy="${y}" r="10" fill="black"/>`;
+
+
+		// Dibujar líneas adicionales si son necesarias
+		if (y <= 10) {
+		  for (let ly = 0; ly <= y; ly += 20) {
+			extraLinesGroup.innerHTML += `<line id="linea-${i}-${ly}" x1="${x - 15}" y1="${ly}" x2="${x + 15}" y2="${ly}" stroke="black" stroke-width="1"/>`;
+		  }
+		}
+
+		if (y >= 110) {
+		  for (let ly = 120; ly >= y; ly -= 20) {
+			extraLinesGroup.innerHTML += `<line id="linea-${i}-${ly}" x1="${x - 15}" y1="${ly}" x2="${x + 15}" y2="${ly}" stroke="black" stroke-width="1"/>`;
+		  }
+		}
+	  });
+	  
+	  // Ocultar después de tiempoVisible
+	  setTimeout(() => {
+	    for (let i = 0; i < notasSecuencia.length; i++) {
+		  const notaElem = document.getElementById(`nota-${i}`);
+		  if (notaElem) notaElem.setAttribute("visibility", "hidden");
+		  // Ocultar todas las líneas asociadas a esta nota
+			const y = notasSecuencia[i].y;
+			if (y <= 10) {
+			  for (let ly = 0; ly <= y; ly += 20) {
+				const linea = document.getElementById(`linea-${i}-${ly}`);
+				if (linea) linea.setAttribute("visibility", "hidden");
+			  }
+			}
+			if (y >= 110) {
+			  for (let ly = 120; ly >= y; ly -= 20) {
+				const linea = document.getElementById(`linea-${i}-${ly}`);
+				if (linea) linea.setAttribute("visibility", "hidden");
+			  }
+			}
+	    }
+	    botonesHabilitados = true;
+		botones.forEach(btn => btn.disabled = false);
+		document.getElementById("feedback").textContent = "🔍 Ahora pulsa las notas en orden";
+
+	  }, tiempoVisible);
+	  
+	  const spacing = 60; // separación entre notas
+	  const svgPadding = 100; // margen para clave y laterales
+	  const totalWidth = svgPadding + (cantidad * spacing);
+
+	  const svg = document.getElementById("staff");
+	  svg.setAttribute("width", totalWidth);
+	  
+	  const lineasPentagrama = document.getElementById("lineas-pentagrama");
+	  lineasPentagrama.innerHTML = ""; // borrar anteriores
+
+  	  const yLines = [20, 40, 60, 80, 100];
+	  yLines.forEach(y => {
+		lineasPentagrama.innerHTML += `
+		  <line x1="0" y1="${y}" x2="${totalWidth}" y2="${y}" stroke="black" stroke-width="1"/>`;
+	  });
+
+
+
+	  indiceActual = 0;
+	  huboFallosEnSecuencia = false;
+
+	// Iniciar cronómetro la primera vez
+	if (!tiempoIniciado) {
+	  tiempoIniciado = true;
+	  tiempoInicio = Date.now();
+	  cronometroInterval = setInterval(() => {
+		const ahora = Date.now();
+		const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+		const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+		const sec = String(segundos % 60).padStart(2, '0');
+		document.getElementById("cronometro").textContent = `${min}:${sec}`;
+	  }, 1000);
+	}
+
+	  botonesHabilitados = false;
+	  document.getElementById("feedback").textContent = "🧠 Memoriza la secuencia";
+
+	}
+
+
+
+	function comprobarNota(respuesta) {
+	  if (!botonesHabilitados || indiceActual >= notasSecuencia.length) return;
+
+	  totalClics++;
+
+	  const notaEsperada = notasSecuencia[indiceActual];
+	  const id = `nota-${indiceActual}`;
+	  const notaElem = document.getElementById(id);
+
+	  if (respuesta === notaEsperada.nombre) {
+	    totalAciertos++;
+
+		if (notaElem) {
+		  notaElem.setAttribute("visibility", "visible");
+		  const y = notaEsperada.y;
+
+		  if (y <= 10) {
+		    for (let ly = 0; ly <= y; ly += 20) {
+		  	  const linea = document.getElementById(`linea-${indiceActual}-${ly}`);
+		  	  if (linea) linea.setAttribute("visibility", "visible");
+		    }
+		  }
+		  if (y >= 110) {
+		    for (let ly = 120; ly >= y; ly -= 20) {
+			  const linea = document.getElementById(`linea-${indiceActual}-${ly}`);
+			  if (linea) linea.setAttribute("visibility", "visible");
+		    }
+		  }
+
+		  // Mostrar en naranja si ya hubo un fallo previo
+		  if (notasFalladas[indiceActual]) {
+			notaElem.setAttribute("fill", "orange");
+		  } else {
+			notaElem.setAttribute("fill", "green");
+		  }
+		}
+
+		indiceActual++;
+		if (indiceActual === notasSecuencia.length) {
+		  
+		  nSecuencias++
+		  if (!huboFallosEnSecuencia) {
+		    secuenciasPerfectas++;
+			  rachaPerfecta++;
+			  if (rachaPerfecta >= 5) {
+				document.getElementById("mensaje-dificultad").textContent = '🔥 ¡Estás preparado para subir la dificultad!';
+			  }
+
+		    document.getElementById("feedback").textContent = "✅ ¡Secuencia completa y perfecta!";
+		  } else {
+		    document.getElementById("feedback").textContent = "✅ ¡Secuencia completa!";
+		  }
+		  document.getElementById("btn-iniciar").disabled = false; // habilitar botón
+		} else {
+		  document.getElementById("feedback").textContent = `✅ Correcto. Nota ${indiceActual + 1}`;
+		}
+	  } else {
+		// Registrar que hubo un fallo en esta posición
+		huboFallosEnSecuencia = true;
+		rachaPerfecta = 0;
+		document.getElementById("mensaje-dificultad").textContent = '';
+
+		notasFalladas[indiceActual] = true;
+		document.getElementById("feedback").textContent = `❌ Incorrecto. Vuelve a intentarlo`;
+	  }
+	  document.getElementById("aciertos").textContent = totalAciertos;
+	  document.getElementById("clics").textContent = totalClics;
+	  document.getElementById("secuenciasperfectas").textContent = secuenciasPerfectas;
+      document.getElementById("secuencias").textContent = nSecuencias;
+	}
+
+	function reiniciarTodo() {
+	  const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+	  if (!confirmar) return;
+	  // Reset de estadísticas
+	  totalAciertos = 0;
+	  totalClics = 0;
+	  secuenciasPerfectas = 0;
+	  nSecuencias=0
+	  huboFallosEnSecuencia = false;
+
+	  document.getElementById("aciertos").textContent = "0";
+	  document.getElementById("clics").textContent = "0";
+	  document.getElementById("secuencias").textContent = "0";
+	  document.getElementById("secuenciasperfectas").textContent = "0";
+
+	  // Reset cronómetro
+	  tiempoIniciado = false;
+	  tiempoInicio = null;
+	  clearInterval(cronometroInterval);
+	  cronometroInterval = null;
+	  document.getElementById("cronometro").textContent = "00:00";
+
+	  // Limpiar pentagrama y feedback
+	  document.getElementById("grupo-notas").innerHTML = "";
+	  document.getElementById("lineas-adicionales").innerHTML = "";
+	  document.getElementById("lineas-pentagrama").innerHTML = "";
+	  document.getElementById("feedback").textContent = "Pulsa Iniciar para empezar a jugar";
+
+	  // Volver a mostrar claves ocultas
+	  document.getElementById("clave-sol").setAttribute("visibility", "hidden");
+	  document.getElementById("clave-fa").setAttribute("visibility", "hidden");
+
+	  // Activar botón iniciar
+	  document.getElementById("btn-iniciar").disabled = false;
+	  
+	  rachaPerfecta = 0;
+	  document.getElementById("mensaje-dificultad").textContent = '';
+	  ultimaConfig = { clave: "", cantidad: 0, tiempo: 0 };
+	}
+
+
+  </script>
+
+</body>
+</html>

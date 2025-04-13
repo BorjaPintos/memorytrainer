@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memoria de Parejas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #tablero {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .carta {
+      width: 80px;
+      height: 80px;
+      margin: 10px;
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #eee;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .oculta {
+      background-color: #aaa;
+      color: transparent;
+      cursor: pointer;
+    }
+    .descubierta {
+      background-color: #fff;
+      color: black;
+    }
+    .acertada {
+      background-color: lightgreen;
+      border-color: green;
+      color: black;
+    }
+    .seleccionada {
+      background-color: lightcyan;
+      border-color: cyan;
+      color: transparent;
+    }
+    .error {
+      background-color: lightcoral;
+      border-color: red;
+      color: transparent;
+    }
+    button:disabled {
+	  opacity: 0.5;
+	  cursor: not-allowed;
+	}
+  </style>
+</head>
+<body>
+
+  <h1>🧑‍🤝‍🧑Encuentra las Parejas</h1>
+
+  <label>Número de parejas:
+    <input type="number" id="num-parejas" value="4" min="2">
+  </label> </br>
+  <label>Segundos visibles:
+    <input type="number" id="tiempo-visible" value="3" min="1">
+  </label>
+  <br>
+  <p id="mensaje-dificultad" style="color: orange; font-weight: bold;"></p>
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  <button id="btn-iniciar" onclick="iniciarJuego()">Iniciar</button>
+
+
+  <div id="tablero"></div>
+  <p id="mensaje">Pulsa Iniciar para empezar el juego</p>
+
+
+  <div id="stats">
+    <p>✅ Secuencias perfectas: <span id="perfectas">0</span> / <span id="partidas">0</span></p>
+  </div>
+  <button onclick="resetJuego()">Reset</button>
+  <script>
+
+
+    let cartas = [];
+    let primeraSeleccion = null;
+    let bloqueado = false;
+    let partidas = 0;
+    let perfectas = 0;
+    let huboFallo = false;
+    let racha = 0;
+    let tiempoIniciado = false;
+    let tiempoInicio;
+    let cronometro;
+    let ultimaConfig = { parejas: 4, tiempo: 3 };
+	let juegoEnCurso = false;
+
+
+    function generarEmojisAleatorios(cantidad) {
+      const emojis = new Set();
+      while (emojis.size < cantidad) {
+        const codePoint = 0x1F600 + Math.floor(Math.random() * (0x1F500 - 0x1F600));
+        emojis.add(String.fromCodePoint(codePoint));
+      }
+      return Array.from(emojis);
+    }
+
+    function iniciarJuego() {
+	  if (juegoEnCurso) return;
+	  juegoEnCurso = true;
+      document.getElementById('btn-iniciar').disabled = true;
+
+      const num = parseInt(document.getElementById('num-parejas').value);
+      const tiempo = parseInt(document.getElementById('tiempo-visible').value);
+
+      if (num !== ultimaConfig.parejas || tiempo !== ultimaConfig.tiempo) {
+        racha = 0;
+        document.getElementById('mensaje-dificultad').textContent = '';
+        ultimaConfig = { parejas: num, tiempo };
+      }
+
+      const seleccionados = generarEmojisAleatorios(num);
+      const duplicados = [...seleccionados, ...seleccionados];
+      cartas = mezclarArray(duplicados.map((icono, i) => ({ id: i, icono, acertada: false })));
+
+      const tablero = document.getElementById('tablero');
+      tablero.innerHTML = '';
+
+      cartas.forEach((carta, idx) => {
+        const div = document.createElement('div');
+        div.className = 'carta descubierta';
+        div.textContent = carta.icono;
+        div.dataset.index = idx;
+        div.onclick = () => seleccionarCarta(idx);
+        tablero.appendChild(div);
+      });
+
+      bloqueado = true;
+	  document.getElementById('mensaje').textContent = '🧠 ¡Memoriza!';
+      setTimeout(() => {
+        document.querySelectorAll('.carta').forEach((el, idx) => {
+          if (!cartas[idx].acertada) {
+            el.classList.remove('descubierta');
+            el.classList.add('oculta');
+            el.textContent = '';
+			document.getElementById('mensaje').textContent = '🔍 ¡Descubre las parejas!';
+          }
+        });
+        bloqueado = false;
+      }, tiempo * 1000);
+
+      
+
+      partidas++;
+      actualizarStats();
+
+      if (!tiempoIniciado) {
+        tiempoIniciado = true;
+        tiempoInicio = Date.now();
+        cronometro = setInterval(() => {
+          const ahora = Date.now();
+          const s = Math.floor((ahora - tiempoInicio) / 1000);
+          const min = String(Math.floor(s / 60)).padStart(2, '0');
+          const sec = String(s % 60).padStart(2, '0');
+          document.getElementById("cronometro").textContent = `${min}:${sec}`;
+        }, 1000);
+      }
+
+      huboFallo = false;
+    }
+
+    function seleccionarCarta(idx) {
+      if (bloqueado) return;
+      const carta = cartas[idx];
+      const div = document.querySelector(`.carta[data-index='${idx}']`);
+      if (carta.acertada || div.classList.contains('descubierta')) return;
+
+      div.classList.remove('oculta');
+      div.classList.add('descubierta');
+      div.textContent = carta.icono;
+
+      if (primeraSeleccion === null) {
+        primeraSeleccion = idx;
+        div.classList.add('seleccionada');
+      } else {
+        bloqueado = true;
+        const segundaSeleccion = idx;
+        if (cartas[primeraSeleccion].icono === cartas[segundaSeleccion].icono) {
+          cartas[primeraSeleccion].acertada = true;
+          cartas[segundaSeleccion].acertada = true;
+          marcarComoAcertadas([primeraSeleccion, segundaSeleccion]);
+          primeraSeleccion = null;
+          bloqueado = false;
+
+          if (cartas.every(c => c.acertada)) {
+            document.getElementById('mensaje').textContent = '✅ ¡Has encontrado todas las parejas!';
+			juegoEnCurso = false;
+            document.getElementById('btn-iniciar').disabled = false;
+
+            if (!huboFallo) {
+              perfectas++;
+              racha++;
+              if (racha >= 5) {
+                document.getElementById("mensaje-dificultad").textContent = '🔥 ¡Estás preparado para subir la dificultad!';
+              }
+            } else {
+              racha = 0;
+              document.getElementById("mensaje-dificultad").textContent = '';
+            }
+            actualizarStats();
+          }
+        } else {
+          huboFallo = true;
+          racha = 0;
+          document.getElementById("mensaje-dificultad").textContent = '';
+          div.classList.add('error');
+          setTimeout(() => {
+            ocultarCartas([primeraSeleccion, segundaSeleccion]);
+            primeraSeleccion = null;
+            bloqueado = false;
+          }, 1000);
+        }
+      }
+      actualizarStats();
+    }
+
+    function marcarComoAcertadas(indices) {
+      indices.forEach(i => {
+        const el = document.querySelector(`.carta[data-index='${i}']`);
+        el.classList.remove('seleccionada');
+        el.classList.add('acertada');
+        el.textContent = cartas[i].icono;
+      });
+    }
+
+    function ocultarCartas(indices) {
+      indices.forEach(i => {
+        const el = document.querySelector(`.carta[data-index='${i}']`);
+        el.classList.add('oculta');
+        el.classList.remove('seleccionada');
+        el.classList.remove('error');
+        el.classList.remove('descubierta');
+        el.textContent = '';
+      });
+    }
+
+    function mezclarArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function actualizarStats() {
+      document.getElementById('perfectas').textContent = perfectas;
+      document.getElementById('partidas').textContent = partidas;
+    }
+
+    function resetJuego() {
+      const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+	  if (!confirmar) return;
+      location.reload();
+    }
+  </script>
+
+</body>
+</html>
