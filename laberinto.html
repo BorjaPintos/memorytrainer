@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Laberinto de Direcciones</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    }
+    #grid {
+      display: none;
+      grid-template-columns: repeat(6, 60px);
+      grid-template-rows: repeat(6, 60px);
+      gap: 2px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 60px;
+      height: 60px;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    .cell.hex {
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+    .cell.round {
+      border-radius: 50%;
+    }
+    .cell.oct {
+      clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    }
+    .cell.start {
+      background-color: yellow;
+    }
+    .cell.end.correct {
+      background-color: lightgreen;
+    }
+    .cell.end.incorrect {
+      background-color: lightcoral;
+    }
+    #arrows-display {
+      font-size: 40px;
+      margin: 20px;
+      min-height: 60px;
+    }
+    #feedback {
+      min-height: 1.5em;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    #mensaje-dificultad {
+      margin-top: 10px;
+      font-size: 16px;
+      color: orange;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+    }
+    #stats {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+	.volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧭 Laberinto</h1>
+  <label>Número de indicaciones: <input type="number" id="num-arrows" value="5" min="1" max="20" onchange="resetRacha()"></label>
+  <br>
+  <label>Segundos visibles: <input type="number" id="show-time" value="3" min="1" onchange="resetRacha()"></label>
+  <br>
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  <br>
+  <button id="start-btn" onclick="startGame()">Iniciar</button>
+
+
+  <div id="arrows-display"></div>
+  <div id="grid"></div>
+  <p id="feedback">Pulsa Iniciar para empezar el juego</p>
+  <div id="mensaje-dificultad"></div>
+  <div id="stats">
+    <p>✅ Secuencias perfectas: <span id="perfectas">0</span> / <span id="totales">0</span></p>
+  </div>
+  <button onclick="resetStats()">🔁 Reset</button>
+    <a class="volver" href="index.html">⬅️ Volver al menú</a>
+  
+  <script>
+    const directions = [
+      {dx: 0, dy: -1, symbol: '⬆'},
+      {dx: 0, dy: 1, symbol: '⬇'},
+      {dx: -1, dy: 0, symbol: '⬅'},
+      {dx: 1, dy: 0, symbol: '➡'},
+      {dx: -1, dy: -1, symbol: '↖'},
+      {dx: 1, dy: -1, symbol: '↗'},
+      {dx: -1, dy: 1, symbol: '↙'},
+      {dx: 1, dy: 1, symbol: '↘'}
+    ];
+
+    let sequence = [];
+    let startX, startY, finalX, finalY;
+    let shapeClass = '';
+    let totalJuegos = 0;
+    let secuenciasPerfectas = 0;
+    let racha = 0;
+    let tiempoIniciado = false;
+    let tiempoInicio = null;
+    let cronometroInterval = null;
+	let juegoActivo = false;
+
+
+    function startGame() {
+      document.getElementById('start-btn').disabled = true;
+      juegoActivo = true;
+
+      const n = parseInt(document.getElementById('num-arrows').value);
+      const time = parseInt(document.getElementById('show-time').value) * 1000;
+
+      const shapes = ['', 'round', 'hex', 'oct'];
+      shapeClass = shapes[Math.floor(Math.random() * shapes.length)];
+
+      generateGrid();
+      sequence = [];
+      document.getElementById('grid').style.display = 'none';
+      document.getElementById('feedback').textContent = '🧠 ¡Memoriza las flechas!';
+
+      let tries = 0;
+      do {
+        startX = Math.floor(Math.random() * 6);
+        startY = Math.floor(Math.random() * 6);
+        sequence = generateSequence(n);
+        [finalX, finalY] = computeFinalPosition(startX, startY, sequence);
+        tries++;
+      } while ((!isValidPosition(finalX, finalY)) && tries < 100);
+
+      document.getElementById('arrows-display').innerHTML = sequence.map(s => s.symbol).join(' ');
+
+      if (!tiempoIniciado) {
+        tiempoIniciado = true;
+        tiempoInicio = Date.now();
+        cronometroInterval = setInterval(() => {
+          const ahora = Date.now();
+          const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+          const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+          const sec = String(segundos % 60).padStart(2, '0');
+          document.getElementById('cronometro').textContent = `${min}:${sec}`;
+        }, 1000);
+      }
+
+      totalJuegos++;
+      updateStats();
+
+      setTimeout(() => {
+        document.getElementById('arrows-display').innerHTML = '';
+        document.getElementById('grid').style.display = 'grid';
+        enableClicks();
+        document.querySelector(`#cell-${startX}-${startY}`).classList.add('start');
+		document.getElementById('feedback').textContent = '🧭 ¿Dónde está el final?';
+      }, time);
+    }
+
+    function resetRacha() {
+      racha = 0;
+      document.getElementById('mensaje-dificultad').textContent = '';
+    }
+
+    function generateSequence(n) {
+      let seq;
+      do {
+        seq = [];
+        for (let i = 0; i < n; i++) {
+          seq.push(directions[Math.floor(Math.random() * directions.length)]);
+        }
+      } while (!isValidSequence(startX, startY, seq));
+      return seq;
+    }
+
+    function isValidSequence(x, y, seq) {
+      for (let dir of seq) {
+        x += dir.dx;
+        y += dir.dy;
+        if (!isValidPosition(x, y)) return false;
+      }
+      return true;
+    }
+
+    function isValidPosition(x, y) {
+      return x >= 0 && x < 6 && y >= 0 && y < 6;
+    }
+
+    function computeFinalPosition(x, y, seq) {
+      for (let dir of seq) {
+        x += dir.dx;
+        y += dir.dy;
+      }
+      return [x, y];
+    }
+
+    function generateGrid() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      for (let y = 0; y < 6; y++) {
+        for (let x = 0; x < 6; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          if (shapeClass) cell.classList.add(shapeClass);
+          cell.id = `cell-${x}-${y}`;
+          cell.addEventListener('click', () => checkAnswer(x, y));
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    function enableClicks() {
+      document.querySelectorAll('.cell').forEach(c => {
+        c.classList.remove('start', 'end', 'correct', 'incorrect');
+        c.textContent = '';
+      });
+    }
+
+    function checkAnswer(x, y) {
+	  if (!juegoActivo) return;
+      const correct = (x === finalX && y === finalY);
+      const endCell = document.querySelector(`#cell-${x}-${y}`);
+      endCell.classList.add('end');
+      endCell.classList.add(correct ? 'correct' : 'incorrect');
+
+      document.getElementById('feedback').textContent = correct ? '✅ ¡Correcto!' : '❌ Incorrecto. Inténtalo de nuevo.';
+
+      if (correct) {
+	    juegoActivo = false;
+        secuenciasPerfectas++;
+        racha++;
+        if (racha >= 5) {
+          document.getElementById('mensaje-dificultad').textContent = '🔥 ¡Estás preparado para subir la dificultad!';
+        }
+        document.getElementById('start-btn').disabled = false;
+        updateStats();
+        revealPath();
+      } else {
+        racha = 0;
+        document.getElementById('mensaje-dificultad').textContent = '';
+      }
+    }
+
+    function revealPath() {
+      document.getElementById('arrows-display').innerHTML = sequence.map(s => s.symbol).join(' ');
+      let x = startX;
+      let y = startY;
+      for (let dir of sequence) {
+        x += dir.dx;
+        y += dir.dy;
+        const cell = document.querySelector(`#cell-${x}-${y}`);
+        cell.textContent = dir.symbol;
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('perfectas').textContent = secuenciasPerfectas;
+      document.getElementById('totales').textContent = totalJuegos;
+    }
+
+    function resetStats() {
+      if (!confirm("¿Seguro que quieres reiniciar todo?")) return;
+      clearInterval(cronometroInterval);
+      location.reload();
+    }
+
+    window.onload = generateGrid;
+  </script>
+</body>
+</html>
