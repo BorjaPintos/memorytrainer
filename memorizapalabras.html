@@ -130,7 +130,7 @@
 	  if (palabrasJson.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
       const respuesta = await fetch('palabras.json');
       const datos = await respuesta.json();
-      palabrasJson = datos.palabras;
+      palabrasJson = datos;
     }
 	document.getElementById("fileInput").addEventListener("change", function(event) {
 	  const archivo = event.target.files[0];
