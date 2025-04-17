@@ -1,0 +1,863 @@
+{
+    "RamónCampayo": {
+        "transformacion": {
+            "0": ["R"],
+            "1": ["T","D"],
+            "2": ["N","Ñ"],
+            "3": ["M"],
+            "4": ["C","Q","K"],
+            "5": ["L"],
+            "6": ["S","Z"],
+            "7": ["F"],
+            "8": ["CH","G","J"],
+            "9": ["P","V","B"]
+        },
+        "casillero": {
+            "0": ["ARO"],
+            "1": [
+                "TÉ",
+                "TEA",
+                "HADA"
+            ],
+            "2": [
+                "ÑU",
+                "NOE",
+                "HUNO",
+                "HENO"
+            ],
+            "3": [
+                "HUMO",
+                "MOHO",
+				"AMA"
+            ],
+            "4": [
+                "OCA",
+                "K.O"
+            ],
+			"5": ["OLA","ALA","HILO"],
+            "6": [
+                "OSO",
+                "ASA",
+                "HUESO"
+            ],
+            "7": [
+			    "UFO",
+                "FEO"
+            ],
+            "8": [
+                "HACHA",
+                "HUCHA",
+				"AJO"
+            ],
+            "9": [
+                "AVE",
+                "BÚHO",
+				"VAHO"
+            ],
+            "10": [
+                "TORO",
+				"ATAR",
+				"T.I.R"
+            ],
+            "11": [
+                "TETA",
+                "DADO",
+				"TATA"
+            ],
+            "12": [
+                "TUNA",
+				"DUNA",
+				"TINA"
+            ],
+            "13": [
+                "DAMA",
+                "TIMO"
+            ],
+            "14": [
+                "TACO",
+                "ATAQUE"
+            ],
+            "15": [
+                "TELA",
+                "TALA"
+            ],
+            "16": [
+                "TAZA",
+                "TOS"
+            ],
+            "17": [
+                "TUFO",
+				"TAIFA"
+            ],
+            "18": [
+                "TEJA",
+				"TOGA",
+				"DAGA"
+            ],
+            "19": [
+                "TAPA",
+				"TUBO",
+				"TUBA"
+            ],
+            "20": [
+                "NORIA",
+                "HONRA"
+            ],
+            "21": [
+                "NIDO",
+				"NATA",
+				"NOTA"
+            ],
+            "22": [
+                "NIÑO",
+				"NANA"
+            ],
+            "23": [
+                "NEMO"
+            ],
+            "24": [
+                "ANCA",
+                "NUCA"
+            ],
+            "25": [
+                "NILO",
+                "NULO"
+            ],
+            "26": [
+                "ANÍS",
+				"NIZA"
+            ],
+            "27": [
+                "NIFE"
+            ],
+            "28": [
+                "NICHO",
+                "ANCHO"
+            ],
+            "29": [
+                "NUBE",
+                "NABO"
+            ],
+            "30": [
+                "MAR",
+                "MIR"
+            ],
+            "31": [
+                "MOTO",
+				"MATA",
+				"META"
+            ],
+            "32": [
+                "MONO",
+                "MINA"
+            ],
+            "33": [
+                "MOMIA",
+				"MEMO",
+				"MAMÁ"
+            ],
+            "34": [
+                "HAMACA",
+				"MOCO"
+            ],
+            "35": [
+                "MULA",
+				"MIEL"
+            ],
+            "36": [
+                "MESA",
+				"MAZO"
+            ],
+            "37": [
+                "MAFIA"
+            ],
+            "38": [
+                "MECHA",
+                "MACHO"
+            ],
+            "39": [
+                "MOPA",
+                "MAPA",
+				"AMEBA"
+            ],
+            "40": [
+                "CORO",
+                "CAR"
+            ],
+            "41": [
+                "COHETE",
+                "CATA",
+                "COTO"
+            ],
+            "42": [
+                "CUNA",
+                "CUÑA",
+                "CONO"
+            ],
+            "43": [
+                "CAMA"
+            ],
+            "44": [
+                "COCO",
+				"COQUE"
+            ],
+            "45": [
+                "COLA",
+				"CULO",
+				"CELO"
+            ],
+            "46": [
+                "CASA",
+                "QUESO"
+            ],
+            "47": [
+                "CAFÉ",
+				"COFIA"
+            ],
+            "48": [
+                "COCHE",
+                "CAJA"
+            ],
+            "49": [
+                "CUBO",
+                "CEPO",
+                "CAPA",
+				"COPA"
+            ],
+            "50": [
+                "LORO",
+                "LIRA"
+            ],
+            "51": [
+                "LATA",
+                "LOTE",
+                "LUTO"
+            ],
+            "52": [
+                "LEON",
+				"LUNA",
+				"LANA",
+				"LINO"
+            ],
+            "53": [
+                "LIMA",
+				"LOMA",
+				"ALMA"
+            ],
+            "54": [
+                "LOCO",
+				"LACA"
+            ],
+            "55": [
+                "LULÚ",
+                "LILA",
+				"LELO",
+				"LOLA"
+            ],
+            "56": [
+                "LAZO",
+                "LOSA",
+				"LISO"
+            ],
+            "57": [
+                "ALFA"
+            ],
+            "58": [
+                "LUCHA",
+				"LAGO"
+            ],
+            "59": [
+                "LOBO",
+                "LAPA"
+            ],
+            "60": [
+                "SOR"
+            ],
+            "61": [
+                "SETA",
+				"SOTA",
+				"ASTA"
+            ],
+            "62": [
+                "SENA"
+            ],
+            "63": [
+                "SIMA"
+            ],
+            "64": [
+                "SACO"
+            ],
+            "65": [
+                "SOL",
+				"SAL"
+            ],
+            "66": [
+                "SESO",
+                "SOSA"
+            ],
+            "67": [
+                "SOFÁ"
+            ],
+            "68": [
+                "SACHO",
+                "SOJA"
+            ],
+            "69": [
+                "SEPIA",
+				"SEBO"
+            ],
+            "70": [
+                "FARO",
+				"FORO",
+				"FURIA"
+            ],
+            "71": [
+                "FOTO",
+                "FETO"
+            ],
+            "72": [
+                "FAENA"
+            ],
+            "73": [
+                "FAMA"
+            ],
+            "74": [
+                "FOCA"
+            ],
+            "75": [
+                "FALO",
+                "FILA",
+				"FILO"
+            ],
+            "76": [
+                "FOSO",
+                "FOSA"
+            ],
+            "77": [
+                "FOFÓ",
+				"FOFO"
+            ],
+            "78": [
+                "FICHA",
+                "FAJA"
+            ],
+            "79": [
+                "EFEBO",
+				"FOBIA"
+            ],
+            "80": [
+                "HACHERO",
+                "BAR"
+            ],
+            "81": [
+                "CHITA",
+                "CHATO"
+            ],
+            "82": [
+                "CHINA",
+                "CHINO"
+            ],
+            "83": [
+                "CHAMA"
+            ],
+            "84": [
+                "CHICO",
+				"CHICA",
+				"JACA"
+            ],
+            "85": [
+                "CHAL",
+				"CHULO",
+				"JALEO"
+            ],
+            "86": [
+                "CHAS",
+				"CHIS"
+            ],
+            "87": [
+                "CHUFA",
+				"JEFE"
+            ],
+            "88": [
+                "CHUCHO"
+            ],
+            "89": [
+                "CHIVO",
+                "CHAPA",
+				"CHIP"
+            ],
+            "90": [
+                "BAR",
+				"VARA"
+            ],
+            "91": [
+                "BOTA",
+				"BATA"
+            ],
+            "92": [
+                "VINO",
+				"VIÑA",
+				"PANA"
+            ],
+            "93": [
+                "BUM"
+            ],
+            "94": [
+                "VACA"
+            ],
+            "95": [
+                "VELA",
+				"BOLA"
+            ],
+            "96": [
+                "VASO"
+            ],
+            "97": [
+                "BOFIA"
+            ],
+            "98": [
+                "BACHE",
+				"BAJO",
+				"VAGO"
+            ],
+            "99": [
+                "BEBÉ",
+                "PAPÁ",
+				"PAVO"
+            ],
+            "100": [
+				"TORERO",
+                "TARRO"
+            ]
+        }
+    },
+    "BorjaPintos": {
+        "transformacion": {
+            "0": ["D","R", "Y"],
+            "1": ["L","T"],
+            "2": ["Z","N","Ñ"],
+            "3": [ "M"],
+            "4": ["C","Q","K"],
+            "5": ["S","X"],
+            "6": ["G","J"],
+            "7": ["F"],
+            "8": ["CH","B"],
+            "9": [ "P","V","W"]
+        },
+        "casillero": {
+            "0": [
+                "HADA",
+                "ARO"
+            ],
+            "1": [
+                "TÉ",
+                "LEO",
+                "ALA"
+            ],
+            "2": [
+                "ÑU",
+                "NOE",
+                "HENO",
+                "UÑA"
+            ],
+            "3": [
+                "HUMO",
+                "MOHO"
+            ],
+            "4": [
+                "OCA",
+                "K.O"
+            ],
+            "5": [
+                "OSO",
+                "ASA",
+                "HUESO"
+            ],
+            "6": [
+                "AGUA",
+                "AJO"
+            ],
+            "7": [
+                "FEO"
+            ],
+            "8": [
+                "HACHA",
+                "BÚHO"
+            ],
+            "9": [
+                "AVE",
+                "HIPO"
+            ],
+            "00": [
+                "YO-YO"
+            ],
+            "01": [
+                "ROTO"
+            ],
+            "02": [
+                "RANA"
+            ],
+            "03": [
+                "RAMO"
+            ],
+            "04": [
+                "ROCA"
+            ],
+            "05": [
+                "ROSA"
+            ],
+            "06": [
+                "REJA"
+            ],
+            "07": [
+                "RIFA"
+            ],
+            "08": [
+                "DUCHA"
+            ],
+            "09": [
+                "ROPA"
+            ],
+            "10": [
+                "LADO",
+                "TORO"
+            ],
+            "11": [
+                "ALETA",
+                "TETA",
+                "TELA"
+            ],
+            "12": [
+                "TAZA"
+            ],
+            "13": [
+                "ÁTOMO",
+                "TIMO",
+                "ALMA"
+            ],
+            "14": [
+                "TACO",
+                "ATAQUE"
+            ],
+            "15": [
+                "TOS",
+                "LOSA"
+            ],
+            "16": [
+                "LAGO",
+                "TAJO",
+                "TOGA",
+                "TEJA"
+            ],
+            "17": [
+                "TUFO"
+            ],
+            "18": [
+                "TUBO"
+            ],
+            "19": [
+                "TAPA"
+            ],
+            "20": [
+                "AZADA",
+                "NUDO"
+            ],
+            "21": [
+                "NATA"
+            ],
+            "22": [
+                "NINI",
+                "NIÑO"
+            ],
+            "23": [
+                "NEMO"
+            ],
+            "24": [
+                "ZUECO",
+                "NUCA"
+            ],
+            "25": [
+                "ANIS",
+                "ZAS"
+            ],
+            "26": [
+                "NIEGA"
+            ],
+            "27": [
+                "NIFE"
+            ],
+            "28": [
+                "NICHO",
+                "NABO",
+                "NUBE"
+            ],
+            "29": [
+                "NAIPE",
+                "NAVE"
+            ],
+            "30": [
+                "MUDO",
+                "MAR",
+                "MORO"
+            ],
+            "31": [
+                "MALO",
+                "MOTO"
+            ],
+            "32": [
+                "MANO",
+                "MONO",
+                "MULA"
+            ],
+            "33": [
+                "MOMIA"
+            ],
+            "34": [
+                "MOCO",
+                "HAMACA"
+            ],
+            "35": [
+                "MESA"
+            ],
+            "36": [
+                "MAGO"
+            ],
+            "37": [
+                "MAFIA"
+            ],
+            "38": [
+                "MECHA",
+                "AMEBA"
+            ],
+            "39": [
+                "MAPA",
+                "MOPA"
+            ],
+            "40": [
+                "CODO",
+                "CORO"
+            ],
+            "41": [
+                "COLA",
+                "CULO",
+                "CELO"
+            ],
+            "42": [
+                "COÑO",
+                "CAZO",
+                "CONO",
+                "CUNA"
+            ],
+            "43": [
+                "CAMA"
+            ],
+            "44": [
+                "CACA",
+                "COCO"
+            ],
+            "45": [
+                "CASA"
+            ],
+            "46": [
+                "CIEGO",
+                "CAJA"
+            ],
+            "47": [
+                "CAFÉ"
+            ],
+            "48": [
+                "COCHE",
+                "CUBO"
+            ],
+            "49": [
+                "COPA",
+                "CEPO",
+                "CAPA"
+            ],
+            "50": [
+                "ASADO",
+                "SEDA",
+                "SUDO"
+            ],
+            "51": [
+                "SETA",
+                "SAL",
+                "SOL",
+                "SOTA",
+                "ASTA"
+            ],
+            "52": [
+                "ASNO"
+            ],
+            "53": [
+                "ASMA"
+            ],
+            "54": [
+                "SACO"
+            ],
+            "55": [
+                "SESO",
+                "SEXO"
+            ],
+            "56": [
+                "SOJA",
+                "SOGA"
+            ],
+            "57": [
+                "SOFÁ"
+            ],
+            "58": [
+                "SACHO"
+            ],
+            "59": [
+                "SAPO",
+                "SEPIA"
+            ],
+            "60": [
+                "JUDO",
+                "GOYA",
+                "GORE"
+            ],
+            "61": [
+                "GATO"
+            ],
+            "62": [
+                "JUEZ"
+            ],
+            "63": [
+                "GOMA"
+            ],
+            "64": [
+                "GECO"
+            ],
+            "65": [
+                "GAS"
+            ],
+            "66": [
+                "GAJO",
+                "GAGA"
+            ],
+            "67": [
+                "GAFA",
+                "GAFE",
+                "JEFE"
+            ],
+            "68": [
+                "GOCHO",
+                "GICHO"
+            ],
+            "69": [
+                "JIPI"
+            ],
+            "70": [
+                "FADO",
+                "FARO"
+            ],
+            "71": [
+                "FOTO",
+                "FILA"
+            ],
+            "72": [
+				"FINO",
+                "FAENA"
+            ],
+            "73": [
+                "FAMA"
+            ],
+            "74": [
+                "FOCA",
+                "FACA"
+            ],
+            "75": [
+                "FOSO",
+                "FOSA"
+            ],
+            "76": [
+                "FAJA",
+                "FAJO"
+            ],
+            "77": [
+                "FOFO"
+            ],
+            "78": [
+                "FICHA",
+                "FACHA",
+                "FOBIA"
+            ],
+            "79": [
+                "FP"
+            ],
+            "80": [
+                "CHARO",
+                "BAR"
+            ],
+            "81": [
+                "BATA",
+                "CHATO"
+            ],
+            "82": [
+                "BAÑO",
+                "CHINO"
+            ],
+            "83": [
+                "BUM"
+            ],
+            "84": [
+                "CHICO"
+            ],
+            "85": [
+                "BESO"
+            ],
+            "86": [
+                "BAJO"
+            ],
+            "87": [
+                "CHEF"
+            ],
+            "88": [
+                "CHOCHO",
+                "BEBÉ",
+                "BACHE"
+            ],
+            "89": [
+                "CHIP",
+                "CHIVO",
+                "CHAPA"
+            ],
+            "90": [
+                "PEDO"
+            ],
+            "91": [
+                "VELA"
+            ],
+            "92": [
+                "PENE"
+            ],
+            "93": [
+                "PUMA"
+            ],
+            "94": [
+                "VACA"
+            ],
+            "95": [
+                "VASO"
+            ],
+            "96": [
+                "VAGO"
+            ],
+            "97": [
+                "PIFIA"
+            ],
+            "98": [
+                "PECHO"
+            ],
+            "99": [
+                "PAPA",
+                "PAVO"
+            ],
+            "100": [
+                "TARRO"
+            ]
+		}
+    }
+}

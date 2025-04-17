@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Entrenamiento con Casillero Mental</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    select, button, input[type="text"] {
+      font-size: 16px;
+      margin: 10px;
+      padding: 8px;
+    }
+    .panel {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .toggle-section {
+      display: none;
+      background: #f4f4f4;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 5px;
+      white-space: pre-wrap;
+    }
+    .key-display {
+      font-size: 28px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .feedback {
+      font-size: 20px;
+      margin-top: 10px;
+      min-height: 1.5em;
+    }
+	.volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔢 Casillero Mental</h1>
+
+  <label>Selecciona sistema:
+    <select id="sistema-select"></select>
+  </label>
+	<label>Número de claves:
+	  <input type="number" id="num-claves" value="1" min="1">
+	</label>
+
+  <div class="key-display" id="clave"></div>
+
+  <input type="text" id="respuesta" placeholder="Escribe una asociación...">
+  <button onclick="comprobarRespuesta()">Comprobar</button>
+  <button onclick="nuevaClave()">🔄 Nueva clave</button>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="panel">
+    <button id="btn-transformacion">▼ Ver transformación</button>
+    <div id="transformacion" class="toggle-section"></div>
+	</br>
+    <button id="btn-casillero">▼ Ver casillero</button>
+    <div id="casillero" class="toggle-section"></div>
+  </div>
+  
+  <button onclick="descargarCasillero()">📥 Descargar casillero</button>
+  <br>
+	<p>Carga tu propio casillero (sigue la plantilla de Descargar el Casillero)</p><input type="file" id="file-input" accept=".json">
+  <br>
+
+  
+<a class="volver" href="index.html">⬅️ Volver al menú</a>
+  <script>
+    let datosCasillero;
+    let sistemaActual = "";
+    let claveActual = "";
+	let tiempoClaveInicio = null;
+	let enPartida = false;
+
+
+    async function cargarDatos() {
+      datosCasillero = await fetch('casillero.json').then(r => r.json());
+      cargarSelectorSistemas();
+    }
+
+    function cargarSelectorSistemas() {
+      const selector = document.getElementById("sistema-select");
+      selector.innerHTML = "";
+      Object.keys(datosCasillero).forEach(nombre => {
+        const option = document.createElement("option");
+        option.value = nombre;
+        option.textContent = nombre;
+        selector.appendChild(option);
+      });
+      selector.value = Object.keys(datosCasillero)[0];
+      sistemaActual = selector.value;
+      mostrarTransformacion();
+      mostrarCasillero();
+      nuevaClave();
+    }
+
+    document.getElementById("sistema-select").addEventListener("change", () => {
+      sistemaActual = document.getElementById("sistema-select").value;
+      mostrarTransformacion();
+      mostrarCasillero();
+      nuevaClave();
+    });
+
+    document.getElementById("btn-transformacion").addEventListener("click", () => toggle("transformacion"));
+    document.getElementById("btn-casillero").addEventListener("click", () => toggle("casillero"));
+
+    function toggle(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function mostrarTransformacion() {
+      const data = datosCasillero[sistemaActual].transformacion;
+      const out = Object.entries(data).map(([num, letras]) => `${num}: ${letras.join(', ')}`).join('\n');
+      document.getElementById("transformacion").textContent = out;
+    }
+
+    function mostrarCasillero() {
+      const data = datosCasillero[sistemaActual].casillero;
+      const out = Object.entries(data).map(([num, palabras]) => `${num}: ${palabras.join(', ')}`).join('\n');
+      document.getElementById("casillero").textContent = out;
+    }
+
+	function nuevaClave() {
+	  const cantidad = parseInt(document.getElementById("num-claves").value);
+	  const clavesDisponibles = Object.keys(datosCasillero[sistemaActual].casillero);
+	  clavesActuales = [];
+
+	  while (clavesActuales.length < cantidad) {
+		const aleatoria = clavesDisponibles[Math.floor(Math.random() * clavesDisponibles.length)];
+		if (!clavesActuales.includes(aleatoria)) {
+		  clavesActuales.push(aleatoria);
+		}
+	  }
+
+	  document.getElementById("clave").textContent = `Claves: ${clavesActuales.join(' ')}`;
+	  document.getElementById("respuesta").value = "";
+	  document.getElementById("feedback").textContent = "";
+	  document.getElementById("respuesta").focus();
+	  tiempoClaveInicio = Date.now();
+	  enPartida=true;
+	}
+
+
+	function comprobarRespuesta() {
+	  const respuestas = document.getElementById("respuesta").value.trim().split(/\s+/);
+	  const feedback = document.getElementById("feedback");
+
+	  if (respuestas.length !== clavesActuales.length) {
+		feedback.textContent = `❌ Debes introducir ${clavesActuales.length} palabras.`;
+		feedback.style.color = "red";
+		return;
+	  }
+
+	  let correcto = true;
+	  for (let i = 0; i < clavesActuales.length; i++) {
+		const clave = clavesActuales[i];
+		const posibles = datosCasillero[sistemaActual].casillero[clave] || [];
+		const respuesta = respuestas[i].toUpperCase();
+		if (!posibles.some(p => p.toUpperCase() === respuesta)) {
+		  correcto = false;
+		  break;
+		}
+	  }
+
+	  if (correcto) {
+		const duracion = ((Date.now() - tiempoClaveInicio) / 1000).toFixed(2);
+		feedback.textContent = `✅ Correcto! Tiempo: ${duracion} segundos.`;
+		feedback.style.color = "green";
+		enPartida=false;
+	  } else {
+		feedback.textContent = "❌ Incorrecto.";
+		feedback.style.color = "red";
+	  }
+	  document.getElementById("respuesta").value = "";
+	}
+	
+	function descargarCasillero() {
+	  const dataStr = JSON.stringify(datosCasillero, null, 2);
+	  const blob = new Blob([dataStr], { type: "application/json" });
+	  const url = URL.createObjectURL(blob);
+
+	  const a = document.createElement("a");
+	  a.href = url;
+	  a.download = "casillero.json";
+	  document.body.appendChild(a);
+	  a.click();
+	  document.body.removeChild(a);
+	  URL.revokeObjectURL(url);
+	}
+	
+    cargarDatos();
+	
+	
+	document.getElementById("file-input").addEventListener("change", function(event) {
+	  const file = event.target.files[0];
+	  if (!file) return;
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+		try {
+		  datosCasillero = JSON.parse(e.target.result);
+		  cargarSelectorSistemas();
+		  alert("✅ Palabras cargadas correctamente.");
+		} catch (err) {
+		  alert("❌ Error al leer el archivo JSON.");
+		}
+	  };
+	  reader.readAsText(file);
+	});
+
+	
+	document.getElementById("respuesta").addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault();
+		if (enPartida){
+			comprobarRespuesta();
+		}else {
+			nuevaClave();
+		}
+	  }
+	});
+	
+  </script>
+</body>
+</html>

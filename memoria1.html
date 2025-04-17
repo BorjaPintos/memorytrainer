@@ -154,9 +154,10 @@
         document.getElementById("check").disabled = false;
 		document.getElementById("resultado").textContent = '🔍 ¿Cuales eran los números?';
 		resultado.style.color = "black";
+		document.getElementById("user-input").focus();
       }, tiempo);
 
-      
+      document.getElementById("user-input").focus();
       document.getElementById("user-input").value = "";
 	  document.getElementById("mostrar-btn").disabled = true;
 
