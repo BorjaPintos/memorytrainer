@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Memoria de Palabras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      user-select: none;
+    }
+    #palabras-container {
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 600px;
+    }
+    .palabra {
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin: 8px;
+      padding: 10px 20px;
+      font-size: 18px;
+      width: 80%;
+    }
+    .oculta {
+      visibility: hidden;
+    }
+    #feedback {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #respuesta-container {
+      margin-top: 20px;
+    }
+    input[type="text"] {
+      padding: 8px;
+      font-size: 16px;
+      width: 250px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #stats {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    #mensaje-dificultad {
+      color: orange;
+      margin-top: 10px;
+      font-size: 16px;
+    }    
+	.volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Memoria de Palabras</h1>
+
+  <label>Número de palabras:
+    <input type="number" id="num-palabras" value="4" min="2">
+  </label></br>
+  <label>Segundos visibles:
+    <input type="number" id="tiempo-visible" value="3" min="1">
+  </label></br>
+  <label>Modo:
+    <select id="modo">
+      <option value="orden">En orden</option>
+      <option value="aleatorio">Aleatorio</option>
+    </select></br>
+  </label></br>
+
+  <div id="mensaje-dificultad"></div>
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  <br>
+  <button id="btn-iniciar" onclick="iniciarJuego()">Iniciar</button>
+
+  <div id="palabras-container"></div>
+  <div id="respuesta-container" style="display: none;">
+    <p id="pregunta"></p>
+    <input type="text" id="respuesta">
+    <button onclick="comprobarRespuesta()">Comprobar</button>
+	<button onclick="rendirse()">😵 Me rindo</button>
+  </div>
+  <div id="feedback"></div>
+  <div id="stats">
+    <p>🎯 Aciertos: <span id="aciertos">0</span> / <span id="intentos">0</span></p>
+    <p>✅ Secuencias perfectas: <span id="perfectas">0</span> / <span id="totales">0</span></p>
+  </div>
+  <br>
+	<p>Carga tus propias palabras</p><input type="file" id="fileInput" accept=".json">
+  <br>
+  <button onclick="resetJuego()">🔁 Reset</button>
+<a class="volver" href="index.html">⬅️ Volver al menú</a>
+  <script>
+    let secuencia = [];
+    let palabrasJson = [];
+    let indexActual = 0;
+    let modo = "orden";
+    let indicesPendientes = [];
+    let aciertos = 0;
+    let intentos = 0;
+    let tiempoInicio = null;
+    let cronometroInterval = null;
+    let totalSecuencias = 0;
+    let secuenciasPerfectas = 0;
+    let rachaPerfectas = 0;
+    let huboFallo = false;
+
+    async function cargarPalabras() {
+	  if (palabrasJson.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
+      const respuesta = await fetch('palabras.json');
+      const datos = await respuesta.json();
+      palabrasJson = datos.palabras;
+    }
+	document.getElementById("fileInput").addEventListener("change", function(event) {
+	  const archivo = event.target.files[0];
+	  if (!archivo) return;
+
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+		try {
+		  const json = JSON.parse(e.target.result);
+		  if (Array.isArray(json)) {
+			palabrasJson = json;
+			alert("✅ Palabras cargadas correctamente.");
+		  } else {
+			alert("❌ El archivo debe tener una estructura como: { \"palabras\": [\"una\", \"dos\"] }");
+		  }
+		} catch (err) {
+		  alert("❌ Error al leer el archivo JSON.");
+		}
+	  };
+	  reader.readAsText(archivo);
+	});
+
+    async function iniciarJuego() {
+      document.getElementById("btn-iniciar").disabled = true;
+      await cargarPalabras();
+      const cantidad = parseInt(document.getElementById('num-palabras').value);
+      const tiempo = parseInt(document.getElementById('tiempo-visible').value) * 1000;
+      modo = document.getElementById('modo').value;
+
+      secuencia = [];
+      indexActual = 0;
+      indicesPendientes = [];
+      huboFallo = false;
+      totalSecuencias++;
+      document.getElementById("feedback").textContent = '🧠 ¡Memoriza las palabras y su orden!';
+      document.getElementById("respuesta-container").style.display = "none";
+
+      const palabrasAleatorias = [...palabrasJson].sort(() => 0.5 - Math.random()).slice(0, cantidad);
+      secuencia = palabrasAleatorias;
+      indicesPendientes = [...Array(secuencia.length).keys()].sort(() => 0.5 - Math.random());
+
+      const contenedor = document.getElementById("palabras-container");
+      contenedor.innerHTML = "";
+
+      palabrasAleatorias.forEach((palabra, i) => {
+        const div = document.createElement("div");
+        div.className = "palabra";
+        div.textContent = `${i + 1}. ${palabra}`;
+        contenedor.appendChild(div);
+      });
+      if (!tiempoInicio) {
+        tiempoInicio = Date.now();
+        cronometroInterval = setInterval(actualizarCronometro, 1000);
+      }
+
+      setTimeout(() => {
+        document.querySelectorAll('.palabra').forEach(p => p.classList.add('oculta'));
+		document.getElementById("feedback").textContent = "";
+        mostrarEntrada();
+      }, tiempo);
+    }
+
+    function mostrarEntrada() {
+      const contenedor = document.getElementById("respuesta-container");
+      const pregunta = document.getElementById("pregunta");
+      contenedor.style.display = "block";
+
+      if (modo === "orden") {
+        if (indexActual < secuencia.length) {
+          pregunta.textContent = `Introduce la palabra número ${indexActual + 1}`;
+        } else {
+          if (!huboFallo) {
+            secuenciasPerfectas++;
+            rachaPerfectas++;
+            if (rachaPerfectas >= 5) {
+              document.getElementById("mensaje-dificultad").textContent = "🔥 ¡Estás preparado para subir la dificultad!";
+            }
+          } else {
+		    document.getElementById("mensaje-dificultad").textContent = "";
+            rachaPerfectas = 0;
+          }
+          actualizarStats();
+          document.getElementById("respuesta-container").style.display = "none";
+          document.getElementById("feedback").textContent = "🎉 ¡Secuencia completa!";
+          document.getElementById("btn-iniciar").disabled = false;
+        }
+      } else {
+        if (indicesPendientes.length > 0) {
+          indexActual = indicesPendientes.shift();
+          pregunta.textContent = `¿Cuál era la palabra número ${indexActual + 1}?`;
+        } else {
+          if (!huboFallo) {
+            secuenciasPerfectas++;
+            rachaPerfectas++;
+            if (rachaPerfectas >= 5) {
+              document.getElementById("mensaje-dificultad").textContent = "🔥 ¡Estás preparado para subir la dificultad!";
+            }
+          } else {
+		    document.getElementById("mensaje-dificultad").textContent = "";
+            rachaPerfectas = 0;
+          }
+          actualizarStats();
+          document.getElementById("respuesta-container").style.display = "none";
+          document.getElementById("feedback").textContent = "🎉 ¡Completado todas las posiciones!";
+          document.getElementById("btn-iniciar").disabled = false;
+        }
+      }
+	  document.getElementById("respuesta").focus();
+
+    }
+
+    function comprobarRespuesta() {
+      const valor = document.getElementById("respuesta").value.trim().toLowerCase();
+      const feedback = document.getElementById("feedback");
+      const correcta = secuencia[indexActual].toLowerCase();
+      const palabrasDivs = document.querySelectorAll("#palabras-container .palabra");
+      intentos++;
+
+      if (valor === correcta) {
+        aciertos++;
+        feedback.textContent = `✅ Correcto: ${valor}`;
+		if (palabrasDivs[indexActual]) {
+          palabrasDivs[indexActual].classList.remove("oculta");
+        }
+        if (modo === "orden") {
+          indexActual++;
+        }
+        mostrarEntrada();
+      } else {
+        huboFallo = true;
+        feedback.textContent = `❌ Incorrecto. La palabra no era "${valor}"`;
+		document.getElementById("mensaje-dificultad").textContent = "";
+      }
+	  document.getElementById("respuesta").value = "";
+      actualizarStats();
+    }
+
+    function actualizarStats() {
+      document.getElementById("aciertos").textContent = aciertos;
+      document.getElementById("intentos").textContent = intentos;
+      document.getElementById("perfectas").textContent = secuenciasPerfectas;
+      document.getElementById("totales").textContent = totalSecuencias;
+    }
+
+    function actualizarCronometro() {
+      const ahora = Date.now();
+      const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+      const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+      const sec = String(segundos % 60).padStart(2, '0');
+      document.getElementById("cronometro").textContent = `${min}:${sec}`;
+    }
+
+    function resetJuego() {
+	  const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
+	  if (!confirmar) return;
+      location.reload();
+    }
+
+    function rendirse() {
+      document.getElementById("respuesta-container").style.display = "none";
+	  document.querySelectorAll('.palabra').forEach(p => p.classList.remove('oculta'));
+	  document.getElementById("feedback").textContent = "😵 Lo harás mejor a próxima vez."
+	  document.getElementById("mensaje-dificultad").textContent = "";
+      document.getElementById("btn-iniciar").disabled = false;
+      rachaPerfectas = 0;
+      actualizarStats();
+    }
+	
+	document.getElementById("respuesta").addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault();
+		comprobarRespuesta();
+	  }
+	});
+	
+	document.getElementById("num-palabras").addEventListener("change", () => {
+	  rachaPerfectas = 0;
+	  document.getElementById("mensaje-dificultad").textContent = "";
+	});
+
+	document.getElementById("tiempo-visible").addEventListener("change", () => {
+	  rachaPerfectas = 0;
+	  document.getElementById("mensaje-dificultad").textContent = "";
+	});
+
+	document.getElementById("modo").addEventListener("change", () => {
+	  rachaPerfectas = 0;
+	  document.getElementById("mensaje-dificultad").textContent = "";
+	});
+
+  </script>
+</body>
+</html>

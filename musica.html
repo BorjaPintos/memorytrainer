@@ -39,7 +39,22 @@
 	.bravura {
 		font-family: 'Noto Music', 'Segoe UI Symbol', 'Arial Unicode MS', serif;
 	}
+    .volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
 
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
   </style>
 </head>
 <body>
@@ -98,7 +113,7 @@
 	  <p>🎯 Aciertos por clic: <span id="aciertos">0</span> / <span id="clics">0</span></p>
   </div>
 <button onclick="reiniciarTodo()">🔁 Reset</button>
-
+<a class="volver" href="index.html">⬅️ Volver al menú</a>
 
   <script>
     const notasSol = [

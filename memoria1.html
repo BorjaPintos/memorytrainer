@@ -38,6 +38,22 @@
 	  opacity: 0.5;
 	  cursor: not-allowed;
 	}
+	    .volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
   </style>
 </head>
 <body>
@@ -74,6 +90,7 @@
     <p>🎯 Aciertos: <span id="aciertos">0</span> / <span id="intentos">0</span></p>
   </div>
   <button onclick="resetearTodo()">🔁 Reset</button>
+  <a class="volver" href="index.html">⬅️ Volver al menú</a>
   <script>
     let segmentosActivos = [];
 
@@ -232,25 +249,15 @@
     function resetearTodo() {
 	  const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
 	  if (!confirmar) return;
-      numeroOriginal = "";
-      numeroFormateado = "";
-      aciertos = 0;
-      intentos = 0;
-      tiempoIniciado = false;
-      clearInterval(cronometroInterval);
-      document.getElementById("cronometro").textContent = "00:00";
-      document.getElementById("aciertos").textContent = "0";
-      document.getElementById("intentos").textContent = "0";
-      document.getElementById("number-display").textContent = "";
-      document.getElementById("user-input").value = "";
-      document.getElementById("resultado").textContent = "Pulsa Mostrar Número para empezar a jugar";
-	  resultado.style.color = "black";
-	  rachaAciertos = 0;
-      document.getElementById("mensaje-dificultad").textContent = '';
-      document.getElementById("mostrar-btn").disabled = false;
-	  document.getElementById("check").disabled = true;
-
+      location.reload();
     }
+	
+	document.getElementById("user-input").addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		mostrarOriginal();   // Llama a tu función de comprobación
+	  }
+	});
   </script>
 
 </body>

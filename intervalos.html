@@ -35,6 +35,22 @@
       margin-top: 20px;
       font-size: 16px;
     }
+	    .volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
   </style>
 </head>
 <body>
@@ -68,7 +84,7 @@
   </div>
   
     <button onclick="resetJuego()">🔁 Reset</button>
-
+<a class="volver" href="index.html">⬅️ Volver al menú</a>
   <script>
     const INTERVALOS = [
       "Segunda menor", "Segunda mayor", "Tercera menor", "Tercera mayor",
