@@ -337,8 +337,12 @@
 		}
 	  }
 	});
-
-    window.onload = actualizarTamanoArea;
+	
+	window.onload = async () => {
+	  await cargarPalabras();
+	  actualizarTamanoArea();
+	};
+	
   </script>
 
 </body>

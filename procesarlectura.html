@@ -115,6 +115,7 @@ async function cargarPalabras() {
   const datos = await respuesta.json();
   palabrasPorNivel = datos;
 }
+
 document.getElementById("fileInput").addEventListener("change", function(event) {
   const archivo = event.target.files[0];
   if (!archivo) return;
@@ -251,7 +252,8 @@ document.addEventListener("keydown", function(event) {
 
 document.getElementById("modo").addEventListener("change", actualizarTiempo);
 
-window.onload = () => {
+window.onload = async () => {
+  await cargarPalabras();
   cargarNiveles();
   actualizarTiempo();
 };

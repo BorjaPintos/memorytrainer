@@ -194,7 +194,7 @@
       "el perro ha ladrado fuertes",
       "el sol ha iluminado todas",
       "la casa ha resistido firmes",
-      "el pájaro ha cantado bonitos",
+      "el pájaro ha cantado bonitos"
     ],
     "bien": [
       "el gato salta ágil",
@@ -249,7 +249,7 @@
       "el pez dorado nadan rápido",
       "la lámpara roto alumbra poco",
       "el autobús llena avanza lento"
-    ]
+    ],
     "bien": [
       "el gato negro salta ágil",
       "la niña pequeña corre rápido",
@@ -271,6 +271,6 @@
       "el pez dorado nada rápido",
       "la lámpara rota alumbra poco",
       "el autobús lleno avanza lento"
-    ],
+    ]
   }
 }
