@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
   <title>Memoria Visual</title>
   <style>
@@ -79,7 +80,7 @@
   </style>
 </head>
 <body>
-
+  <!-- By BorjaPintos -->
   <h1>👁️👁️ 🎯 Memoria Visual: Clic en orden</h1>
 
   <div id="config">
@@ -127,10 +128,11 @@
     let configInicial = { puntos: 5, segundos: 3 };
     let modoJuego = "orden";
     let indicesPendientes = [];
-
+    let juegoIniciado = false;
+	
     function startGame() {
       resetGameBoard();
-
+      juegoIniciado = true;
       if (!tiempoIniciado) {
         tiempoIniciado = true;
         inicioTiempo = Date.now();
@@ -247,6 +249,7 @@
           document.getElementById('feedback').textContent = "✅ ¡Secuencia completada!";
           clickable = false;
           document.getElementById('start-btn').disabled = false;
+		  juegoIniciado=false;
         } else {
           document.getElementById('feedback').textContent = `Bien. Ahora el ${expected}`;
         }
@@ -293,6 +296,15 @@
         document.getElementById('cronometro').textContent = `${min}:${sec}`;
       }, 1000);
     }
+	
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (!juegoIniciado) {
+			startGame();   // Llama a tu función de comprobación
+		} 
+	  }
+	});
 
   </script>
 

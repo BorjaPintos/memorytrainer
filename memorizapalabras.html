@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
   <title>Memoria de Palabras</title>
   <style>
@@ -74,6 +75,7 @@
   </style>
 </head>
 <body>
+  <!-- By BorjaPintos -->
   <h1>🧠 Memoria de Palabras</h1>
 
   <label>Número de palabras:
@@ -125,6 +127,7 @@
     let secuenciasPerfectas = 0;
     let rachaPerfectas = 0;
     let huboFallo = false;
+	let juegoIniciado = false;
 
     async function cargarPalabras() {
 	  if (palabrasJson.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
@@ -155,6 +158,7 @@
 
     async function iniciarJuego() {
       document.getElementById("btn-iniciar").disabled = true;
+	  juegoIniciado = true;
       await cargarPalabras();
       const cantidad = parseInt(document.getElementById('num-palabras').value);
       const tiempo = parseInt(document.getElementById('tiempo-visible').value) * 1000;
@@ -216,6 +220,7 @@
           document.getElementById("respuesta-container").style.display = "none";
           document.getElementById("feedback").textContent = "🎉 ¡Secuencia completa!";
           document.getElementById("btn-iniciar").disabled = false;
+		  juegoIniciado = false;
         }
       } else {
         if (indicesPendientes.length > 0) {
@@ -236,6 +241,7 @@
           document.getElementById("respuesta-container").style.display = "none";
           document.getElementById("feedback").textContent = "🎉 ¡Completado todas las posiciones!";
           document.getElementById("btn-iniciar").disabled = false;
+		  juegoIniciado = false;
         }
       }
 	  document.getElementById("respuesta").focus();
@@ -297,12 +303,17 @@
       document.getElementById("btn-iniciar").disabled = false;
       rachaPerfectas = 0;
       actualizarStats();
+	  juegoIniciado = false;
     }
 	
-	document.getElementById("respuesta").addEventListener("keydown", function(event) {
+	document.addEventListener("keydown", function(event) {
 	  if (event.key === "Enter") {
 		event.preventDefault();
-		comprobarRespuesta();
+		if (juegoIniciado){
+		   comprobarRespuesta();
+		} else {
+		   iniciarJuego();
+		}
 	  }
 	});
 	

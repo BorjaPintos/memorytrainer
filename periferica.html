@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- By BorjaPintos -->
+  <meta charset="UTF-8">
+  <title>Visión Periférica - Movimiento y Memoria</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #config {
+      margin-bottom: 20px;
+    }
+    #game-area {
+      border: 2px solid #ccc;
+      margin: 20px auto;
+      background: #f9f9f9;
+      position: relative;
+      overflow: hidden;
+    }
+    .marcador {
+	  position: absolute;
+	  width: 20px;
+	  height: 20px;
+	  font-size: 24px;
+	  font-weight: bold;
+	  color: black;
+	  background: transparent;
+	  text-align: center;
+	  line-height: 20px;
+	  pointer-events: none;
+	  user-select: none;
+	  transform: translate(-50%, -50%);
+    }
+    .flotante {
+      position: absolute;
+      font-size: 24px;
+      font-weight: bold;
+      pointer-events: none;
+      color: black;
+	  transform: translate(-50%, -50%); /* ✅ CENTRAR en su coordenada */
+    }
+    button {
+      margin: 10px;
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+    select, input {
+      margin: 5px;
+      padding: 5px;
+    }
+    #respuesta-container {
+      margin-top: 20px;
+    }
+	.volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+	.volver:hover {
+      background-color: #1f4b8a;
+    }
+  </style>
+</head>
+<body>
+  <!-- By BorjaPintos -->
+  <h1>👁️ Visión Periférica 👁️</h1>
+
+  <div id="config">
+    <label>Modo:
+      <select id="modo">
+        <option value="digitos">Dígitos</option>
+        <option value="palabras">Palabras</option>
+      </select>
+    </label><br>
+
+    <label>Número de dígitos/palabras juntos:
+      <input type="number" id="grupo" value="2" min="1" max="5">
+    </label><br>
+
+    <label>Tiempo visible (ms):
+      <input type="number" id="tiempo" value="1000" min="100">
+    </label><br>
+
+    <label>Área de juego:
+      <select id="tamano-area" onchange="actualizarTamanoArea()">
+        <option value="600x400">600x400</option>
+        <option value="800x500">800x500</option>
+        <option value="1000x600">1000x600</option>
+      </select>
+    </label><br>
+
+    <button id="start-btn" onclick="iniciarJuego()">Iniciar</button>
+    <button onclick="cambiarPosiciones()">Cambiar posiciones</button>
+    <p id="feedback">✖ Selecciona dos nuevas posiciones haciendo clic en el área. ✖</p>
+	<div id="respuesta-container"">
+		<input type="text" id="respuesta" size="40" disabled>
+		<button id="btn-comprobar" onclick="comprobarRespuesta()" disabled>Comprobar</button>
+	 </div>
+  </div>
+
+  <div id="game-area" onclick="marcarPosicion(event)"></div>
+
+
+
+  <br>
+	<p>Carga tus propias palabras</p><input type="file" id="fileInput" accept=".json">
+  <br>
+  <a class="volver" href="index.html">⬅️ Volver al menú</a>
+  <script>
+  
+    let palabrasDisponibles = [];
+    let posiciones = [];
+    let enEjecucion = false;
+    let respuestasCorrectas = [];
+	
+	async function cargarPalabras() {
+	  if (palabrasDisponibles.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
+      const respuesta = await fetch('palabras.json');
+      const datos = await respuesta.json();
+      palabrasDisponibles = datos;
+    }
+	document.getElementById("fileInput").addEventListener("change", function(event) {
+	  const archivo = event.target.files[0];
+	  if (!archivo) return;
+
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+		try {
+		  const json = JSON.parse(e.target.result);
+		  if (Array.isArray(json)) {
+			palabrasDisponibles = json;
+			alert("✅ Palabras cargadas correctamente.");
+		  } else {
+			alert("❌ El archivo debe tener una estructura como: { \"palabras\": [\"una\", \"dos\"] }");
+		  }
+		} catch (err) {
+		  alert("❌ Error al leer el archivo JSON.");
+		}
+	  };
+	  reader.readAsText(archivo);
+	});
+
+    function iniciarJuego() {
+      if (posiciones.length < 2) {
+        alert("Debes marcar dos posiciones primero.");
+        return;
+      }
+
+      enEjecucion = true;
+      document.getElementById("start-btn").disabled = true;
+      document.getElementById("feedback").textContent = "👀 Atent@ que empieza!!!";
+	  feedback.style.color = "black";
+      document.getElementById("respuesta").disabled = true;
+      document.getElementById("btn-comprobar").disabled = true;
+      animarEncuentro();
+    }
+
+    function animarEncuentro() {
+	  const [p1, p2] = posiciones;
+	  const centroX = (p1.x + p2.x) / 2;
+	  const centroY = (p1.y + p2.y) / 2;
+
+	  document.querySelectorAll('.marcador').forEach(marcador => {
+		marcador.style.left = centroX + "px";
+		marcador.style.top = centroY + "px";
+		marcador.textContent = "✖";
+		marcador.style.transition = "left 1s ease, top 1s ease"; // solo movimiento
+	  });
+
+	  // Después de moverse, ahora sí reducimos tamaño
+	  setTimeout(() => {
+		document.querySelectorAll('.marcador').forEach(marcador => {
+		  marcador.style.transition = "transform 0.5s ease";
+		  marcador.style.transform = "translate(-50%, -50%) scale(0)";
+		});
+	  }, 1000); // Esperar a que lleguen al centro antes de reducir tamaño
+
+	  // Y luego quitarlos
+	  setTimeout(() => {
+		document.querySelectorAll('.marcador').forEach(e => e.remove());
+		document.getElementById("feedback").textContent = "🤯🤯🤯";
+		lanzarUnaAparicion();
+	  }, 1600); // 1000ms de mover + 500ms de hacer pequeños + un pelín extra
+	}
+
+
+    function lanzarUnaAparicion() {
+	  const modo = document.getElementById("modo").value;
+	  const grupo = parseInt(document.getElementById("grupo").value);
+	  const tiempo = parseInt(document.getElementById("tiempo").value);
+	  respuestasCorrectas = [];
+
+	  const gameArea = document.getElementById("game-area");
+
+	  // ✅ GUARDAR copia de posiciones
+	  const posicionesGuardadas = posiciones.map(p => ({ x: p.x, y: p.y }));
+
+	  for (let pos of posicionesGuardadas) {
+		const flotante = document.createElement("div");
+		flotante.className = "flotante";
+		flotante.style.left = pos.x + "px";
+		flotante.style.top = pos.y + "px";
+
+		const contenido = generarContenido(modo, grupo);
+		flotante.textContent = contenido;
+		respuestasCorrectas.push(contenido);
+		gameArea.appendChild(flotante);
+	  }
+
+	  setTimeout(() => {
+		limpiarPantalla();  // ⬅️ Ahora sí, ya no nos afecta
+		document.getElementById("respuesta").disabled = false;
+		 document.getElementById("btn-comprobar").disabled = false;
+		document.getElementById("feedback").textContent = "👀 ¿Qué viste? "
+		document.getElementById("respuesta").value = "";         // Limpiar input
+		document.getElementById("respuesta").focus();            // Poner foco
+
+		
+		posiciones = posicionesGuardadas.map(p => ({ x: p.x, y: p.y })); 
+
+		// ✅ USAR posicionesGuardadas para recrear los puntos
+		posicionesGuardadas.forEach(p => {
+		  const punto = document.createElement("div");
+		  punto.className = "marcador";
+		  punto.style.left = p.x + "px";
+		  punto.style.top = p.y + "px";
+		  punto.textContent = "✖";
+		  gameArea.appendChild(punto);
+		});
+
+		document.getElementById("start-btn").disabled = false;
+	  }, tiempo);
+	}
+
+
+    function generarContenido(modo, grupo) {
+      if (modo === "digitos") {
+        return Array.from({ length: grupo }, () => Math.floor(Math.random() * 10)).join('');
+      } else {
+        const palabras = [];
+        for (let i = 0; i < grupo; i++) {
+          palabras.push(palabrasDisponibles[Math.floor(Math.random() * palabrasDisponibles.length)]);
+        }
+        return palabras.join(' ');
+      }
+    }
+
+    function limpiarPantalla(borrarPosiciones = true) {
+      document.querySelectorAll("#game-area .flotante").forEach(e => e.remove());
+      if (borrarPosiciones) {
+        posiciones = [];
+      }
+    }
+
+    function mostrarInput() {
+      document.getElementById("respuesta").disabled = false;
+	   document.getElementById("btn-comprobar").disabled = false;
+      document.getElementById("respuesta").value = "";
+      document.getElementById("respuesta").focus();
+    }
+
+    function comprobarRespuesta() {
+      const entrada = document.getElementById("respuesta").value.trim().toLowerCase();
+      const esperado = respuestasCorrectas.join(' ').toLowerCase();
+      const feedback = document.getElementById("feedback");
+
+      if (entrada === esperado) {
+        feedback.textContent = "✅ ¡Correcto!";
+        feedback.style.color = "green";
+      } else {
+        feedback.textContent = `❌ Incorrecto. Era: "${esperado}"`;
+        feedback.style.color = "red";
+      }
+
+      enEjecucion = false;
+    }
+
+    function marcarPosicion(event) {
+      if (posiciones.length >= 2 || enEjecucion) return;
+
+      const rect = event.target.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      posiciones.push({ x, y });
+
+      const marcador = document.createElement("div");
+      marcador.className = "marcador";
+      marcador.style.left = x + "px";
+      marcador.style.top = y + "px";
+	  marcador.textContent = "✖";
+      document.getElementById("game-area").appendChild(marcador);
+    }
+
+    function actualizarTamanoArea() {
+      const seleccion = document.getElementById("tamano-area").value;
+      const [ancho, alto] = seleccion.split("x").map(Number);
+      const gameArea = document.getElementById("game-area");
+      gameArea.style.width = ancho + "px";
+      gameArea.style.height = alto + "px";
+      posiciones = [];
+      limpiarPantalla();
+    }
+	
+	function cambiarPosiciones() {
+	
+	  enEjecucion = false;
+	  // Eliminar puntos de la pantalla
+	  document.querySelectorAll(".marcador").forEach(el => el.remove());
+
+	  // Limpiar variable de posiciones
+	  posiciones = [];
+
+	  // Mensaje opcional para usuario
+	  document.getElementById("feedback").textContent = "✖ Selecciona dos nuevas posiciones haciendo clic en el área. ✖";
+	  feedback.style.color = "black";
+	}
+
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita enviar formularios si los hubiera
+		if (enEjecucion) {
+		  comprobarRespuesta();
+		}
+		else {
+		   iniciarJuego();
+		}
+	  }
+	});
+
+    window.onload = actualizarTamanoArea;
+  </script>
+
+</body>
+</html>

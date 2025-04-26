@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
   <title>Memoria de Intervalos Sonoros</title>
   <style>
@@ -35,7 +36,7 @@
       margin-top: 20px;
       font-size: 16px;
     }
-	    .volver {
+	.volver {
       display: block;
       margin: 40px auto 0;
       padding: 12px 24px;
@@ -54,6 +55,7 @@
   </style>
 </head>
 <body>
+  <!-- By BorjaPintos -->
   <h1>🎵 Memoria de Intervalos Sonoros</h1>
 
   <label>Dirección:
@@ -101,6 +103,7 @@
     let tiempoIniciado = false;
     let tiempoInicio;
     let cronometro;
+	let juegoIniciado = false;
 
     document.addEventListener('DOMContentLoaded', () => {
       const contenedor = document.getElementById("opciones");
@@ -115,6 +118,7 @@
 
     function iniciarJuego() {
       desactivarBotones();
+	  juegoIniciado=true;
       document.getElementById("btn-escuchar").disabled = true;
       document.getElementById("indicador").textContent = "👂 Atento al sonido...";
 	  document.getElementById("indicador").style.color = "black";
@@ -198,6 +202,7 @@
       actualizarStats();
       document.getElementById("btn-escuchar").disabled = false;
       desactivarBotones();
+	  juegoIniciado=false;
     }
 
     function actualizarStats() {
@@ -210,6 +215,15 @@
 	  if (!confirmar) return;
       location.reload();
     }
+	
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (!juegoIniciado) {
+			iniciarJuego();
+		}
+	  }
+	});
   </script>
 
 </body>

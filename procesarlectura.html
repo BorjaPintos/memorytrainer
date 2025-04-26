@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- By BorjaPintos -->
+  <meta charset="UTF-8">
+  <title>Reacción Rápida: Palabras Correctas o Incorrectas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #config {
+      margin-bottom: 20px;
+    }
+    #game-area {
+      width: 600px;
+      height: 300px;
+      margin: 0 auto;
+      border: 2px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      background-color: #f9f9f9;
+      user-select: none;
+    }
+    button, select, input {
+      margin: 5px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    #stats {
+      margin-top: 15px;
+      font-size: 18px;
+    }	
+	.volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+  </style>
+</head>
+<body>
+  <!-- By BorjaPintos -->
+<h1>⚡ Reacción Rápida ⚡</h1>
+
+<div id="config">
+  <label>Nivel:
+    <select id="nivel"></select>
+  </label><br>
+
+  <label>Modo de juego:
+    <select id="modo">
+      <option value="continuo">Continuo</option>
+      <option value="desaparicion">Desaparición</option>
+    </select>
+  </label><br>
+
+  <label>Tiempo visible (ms, solo desaparición):
+    <input type="number" id="tiempo-visible" value="500" min="1">
+  </label><br>
+  <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  <button onclick="iniciarJuego()" id="start-btn">Iniciar</button>
+  <button onclick="detenerJuego()" id="stop-btn" disabled>Stop</button>
+</div>
+
+<div id="game-area">✖</div>
+
+<div id="stats">
+  <p id="aciertos">🎯 Aciertos: 0 / 0</p>
+</div>
+
+  <br>
+	<p>Carga tus propias frases</p><input type="file" id="fileInput" accept=".json">
+  <br>
+<a class="volver" href="index.html">⬅️ Volver al menú</a>
+<script>
+let palabrasPorNivel = []
+let palabrasActuales = [];
+let tipoActual = "";
+let jugando = false;
+let timeoutMostrar = null;
+let aciertos = 0;
+let intentos = 0;
+let cronometroInterval = null;
+let tiempoInicio = null;
+
+
+function cargarNiveles() {
+  const selector = document.getElementById("nivel");
+  for (const nivel in palabrasPorNivel) {
+    const opt = document.createElement("option");
+    opt.value = nivel;
+    opt.textContent = "Nivel " + nivel;
+    selector.appendChild(opt);
+  }
+}
+
+async function cargarPalabras() {
+  if (palabrasPorNivel.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
+  const respuesta = await fetch('frases.json');
+  const datos = await respuesta.json();
+  palabrasPorNivel = datos;
+}
+document.getElementById("fileInput").addEventListener("change", function(event) {
+  const archivo = event.target.files[0];
+  if (!archivo) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+	try {
+	  const json = JSON.parse(e.target.result);
+	  palabrasPorNivel = json;
+	  alert("✅ Palabras cargadas correctamente.");
+	  cargarNiveles();
+	} catch (err) {
+	  alert("❌ Error al leer el archivo JSON. Por favor visite las instrucciones para ver un ejemplo del fichero");
+	}
+  };
+  reader.readAsText(archivo);
+});
+
+
+
+
+function iniciarJuego() {
+  if (jugando) return;
+  jugando = true;
+  aciertos = 0;
+  intentos = 0;
+  document.getElementById("start-btn").disabled = true;
+  document.getElementById("stop-btn").disabled = false;
+  document.getElementById("modo").disabled = true;
+  document.getElementById("nivel").disabled = true;
+  document.getElementById("tiempo-visible").disabled = true;
+  inicioTiempo = Date.now();
+  iniciarCronometro();
+  lanzarNuevaPalabra();
+}
+
+function lanzarNuevaPalabra() {
+  const nivelSeleccionado = document.getElementById("nivel").value;
+  const data = palabrasPorNivel[nivelSeleccionado];
+
+  const esMal = Math.random() < 0.5;
+  tipoActual = esMal ? "mal" : "bien";
+  palabrasActuales = data[tipoActual];
+
+  const palabra = palabrasActuales[Math.floor(Math.random() * palabrasActuales.length)];
+  document.getElementById("game-area").textContent = palabra;
+
+  const modo = document.getElementById("modo").value;
+  if (modo === "desaparicion") {
+    const tiempo = parseInt(document.getElementById("tiempo-visible").value);
+    timeoutMostrar = setTimeout(() => {
+      document.getElementById("game-area").textContent = "";
+    }, tiempo);
+  }
+}
+
+document.addEventListener("keydown", function(event) {
+  if (!jugando) return;
+
+  const key = event.key.toLowerCase();
+  if (key !== 'c' && key !== 'x') return;
+
+  intentos++;
+
+  if ((tipoActual === "bien" && key === "c") || (tipoActual === "mal" && key === "x")) {
+    aciertos++;
+  }
+
+  actualizarStats();
+
+  if (document.getElementById("modo").value === "continuo") {
+    lanzarNuevaPalabra();
+  } else {
+    setTimeout(() => {
+      lanzarNuevaPalabra();
+    }, 300);
+  }
+});
+
+
+function actualizarStats() {
+  const tiempoActual = calcularTiempoTranscurrido();
+  document.getElementById("aciertos").textContent = `🎯 Aciertos: ${aciertos} / ${intentos}`;
+}
+
+function iniciarCronometro() {
+  cronometroInterval = setInterval(() => {
+	const ahora = Date.now();
+	const segundos = Math.floor((ahora - inicioTiempo) / 1000);
+	const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+	const sec = String(segundos % 60).padStart(2, '0');
+	document.getElementById('cronometro').textContent = `${min}:${sec}`;
+  }, 1000);
+}
+
+function calcularTiempoTranscurrido() {
+  if (!tiempoInicio) return "00:00";
+  const ahora = Date.now();
+  const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+  const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+  const sec = String(segundos % 60).padStart(2, '0');
+  return `${min}:${sec}`;
+}
+
+function detenerJuego() {
+  jugando = false;
+  clearTimeout(timeoutMostrar);
+  clearInterval(cronometroInterval);
+  document.getElementById("start-btn").disabled = false;
+  document.getElementById("stop-btn").disabled = true;
+  document.getElementById("modo").disabled = false;
+  document.getElementById("nivel").disabled = false;
+  document.getElementById("tiempo-visible").disabled = false;
+  document.getElementById("game-area").textContent = "✖";
+}
+
+function actualizarTiempo() {
+  const modo = document.getElementById("modo").value;
+  const tiempoInput = document.getElementById("tiempo-visible");
+  tiempoInput.disabled = (modo !== "desaparicion");
+}
+
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Enter") {
+	event.preventDefault(); // Evita enviar formularios si los hubiera
+	if (jugando) {
+	  detenerJuego();
+	}
+	else {
+	  iniciarJuego();
+	}
+  }
+});
+
+document.getElementById("modo").addEventListener("change", actualizarTiempo);
+
+window.onload = () => {
+  cargarNiveles();
+  actualizarTiempo();
+};
+</script>
+
+</body>
+</html>

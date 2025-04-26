@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
   <title>Piedra, Papel o Tijera - Memoria</title>
   <style>
@@ -69,7 +70,7 @@
   </style>
 </head>
 <body>
-
+  <!-- By BorjaPintos -->
   <h1>✊, ✋ o ✌ - Memoria</h1>
 
   <label>Manos contra las que competir:
@@ -123,10 +124,11 @@
     let puedeSeleccionar = false;
     let rachaPerfectas = 0;
     let ultimaConfig = { manos: 3, tiempo: 3 };
+	let juegoIniciado = false;
 
     function iniciarJuego() {
       if (!puedeSeleccionar && secuencia.length > 0 && indice < secuencia.length) return;
-
+      juegoIniciado = true;
       const cantidad = parseInt(document.getElementById('num-manos').value);
       const tiempo = parseInt(document.getElementById('tiempo-visible').value) * 1000;
 
@@ -224,6 +226,7 @@
           actualizarMensaje('✅ ¡Secuencia completada!');
           puedeSeleccionar = false;
           document.getElementById("btn-iniciar").disabled = false;
+		  juegoIniciado = false;
         }
       } else {
         huboFallo = true;
@@ -251,6 +254,15 @@
 	  if (!confirmar) return;
       location.reload();
     }
+	
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (!juegoIniciado) {
+			iniciarJuego();
+		}
+	  }
+	});
   </script>
 
 </body>

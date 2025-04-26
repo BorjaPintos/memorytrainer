@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <!-- By BorjaPintos -->
+  <meta charset="UTF-8">
+  <title>Reconocimiento de Repetidos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #config {
+      margin-bottom: 20px;
+    }
+    #game-area {
+      width: 600px;
+      height: 400px;
+      border: 2px solid #ccc;
+      margin: 0 auto;
+      position: relative;
+      background-color: #f9f9f9;
+    }
+    #preguntas {
+      margin-top: 30px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+    }
+    select, input {
+      margin: 5px;
+    }
+	.flotante {
+		position: absolute;
+		font-size: 24px;
+		font-weight: bold;
+		color: black;
+		pointer-events: none; /* No molestar clics */
+	 }
+	.volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+  </style>
+</head>
+<body>
+  <!-- By BorjaPintos -->
+  <h1>🧠 Reconoce el Repetido</h1>
+
+  <div id="config">
+    <label>Modo:
+      <select id="modo">
+        <option value="digitos">Dígitos</option>
+        <option value="palabras">Palabras</option>
+      </select>
+    </label><br>
+
+    <label>Número de dígitos/palabras juntos:
+      <input type="number" id="grupo" value="1" min="1" max="5">
+    </label><br>
+
+    <label>Tiempo visible (ms):
+      <input type="number" id="tiempo" value="1000" min="100">
+    </label><br>
+	
+	 <label>Área de juego:
+     <select id="tamano-area" onchange="actualizarTamanoArea()">
+      <option value="600x400">600x400</option>
+      <option value="800x500">800x500</option>
+      <option value="1000x600">1000x600</option>
+    </select>
+    </label><br>
+
+    <button id="start-btn" onclick="iniciarJuego()">Iniciar</button>
+    <button id="stop-btn" onclick="detenerJuego()" disabled>Detener</button>
+  </div>
+
+  <div id="game-area"></div>
+
+
+  <div id="preguntas" style="display:none;">
+    <p>¿Qué elemento apareció dos veces?</p>
+    <select id="opcion-repetido"></select><br><br>
+
+    <p>¿Qué elemento no apareció?</p>
+    <select id="opcion-no-aparecido"></select><br><br>
+
+    <button onclick="comprobarRespuestas()">Comprobar Respuestas</button>
+  </div>
+
+  <p id="feedback"></p>
+
+  <br>
+	<p>Carga tus propias palabras</p><input type="file" id="fileInput" accept=".json">
+  <br>
+  <a class="volver" href="index.html">⬅️ Volver al menú</a>
+  <script>
+  
+    let palabrasDisponibles = [];
+    let secuencia = [];
+    let candidatos = [];
+    let repetido = "";
+    let noAparecido = "";
+    let intervalo;
+    let enEjecucion = false;
+	
+	async function cargarPalabras() {
+	  if (palabrasDisponibles.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
+      const respuesta = await fetch('palabras.json');
+      const datos = await respuesta.json();
+      palabrasDisponibles = datos;
+    }
+	document.getElementById("fileInput").addEventListener("change", function(event) {
+	  const archivo = event.target.files[0];
+	  if (!archivo) return;
+
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+		try {
+		  const json = JSON.parse(e.target.result);
+		  if (Array.isArray(json)) {
+			palabrasDisponibles = json;
+			alert("✅ Palabras cargadas correctamente.");
+		  } else {
+			alert("❌ El archivo debe tener una estructura como: { \"palabras\": [\"una\", \"dos\"] }");
+		  }
+		} catch (err) {
+		  alert("❌ Error al leer el archivo JSON.");
+		}
+	  };
+	  reader.readAsText(archivo);
+	});
+
+    function iniciarJuego() {
+      const modo = document.getElementById("modo").value;
+      const grupo = parseInt(document.getElementById("grupo").value);
+      const cantidad = 10;
+      const tiempo = parseInt(document.getElementById("tiempo").value);
+
+      document.getElementById("start-btn").disabled = true;
+      document.getElementById("stop-btn").disabled = false;
+      document.getElementById("preguntas").style.display = "none";
+      document.getElementById("feedback").textContent = "";
+
+      secuencia = [];
+      candidatos = [];
+      enEjecucion = true;
+
+	  prepararSecuencia();
+	  mostrarSecuencia(0, tiempo);
+
+    }
+	
+	function prepararSecuencia() {
+	  const modo = document.getElementById("modo").value;
+	  const grupo = parseInt(document.getElementById("grupo").value);
+
+	  secuencia = [];
+	  candidatos = [];
+	  let todas = [];
+
+	  if (modo === "digitos") {
+		// Generar 9 únicos números
+		while (todas.length < 9) {
+		  const num = Array.from({ length: grupo }, () => Math.floor(Math.random() * 10)).join('');
+		  if (!todas.includes(num)) todas.push(num);
+		}
+
+		// Elegimos repetido y no aparecido
+		repetido = todas[Math.floor(Math.random() * todas.length)];
+		do {
+		  noAparecido = Array.from({ length: grupo }, () => Math.floor(Math.random() * 10)).join('');
+		} while (todas.includes(noAparecido));
+
+		// Creamos secuencia con 9 + el repetido (total 10)
+		secuencia = [...todas, repetido];
+		secuencia.sort(() => 0.5 - Math.random());
+
+		candidatos = [...todas, noAparecido];
+		candidatos.sort(() => 0.5 - Math.random());
+
+	  } else {
+		// Palabras: queremos 10 individuales (con 1 repetida, 1 ausente)
+		const copia = [...palabrasDisponibles];
+		copia.sort(() => 0.5 - Math.random());
+
+		// Seleccionar 9 únicas
+		while (todas.length < 9 && copia.length > 0) {
+		  const palabra = copia.shift();
+		  if (!todas.includes(palabra)) todas.push(palabra);
+		}
+
+		repetido = todas[Math.floor(Math.random() * todas.length)];
+		do {
+		  noAparecido = palabrasDisponibles[Math.floor(Math.random() * palabrasDisponibles.length)];
+		} while (todas.includes(noAparecido));
+
+		// 10 palabras individuales (1 repetida)
+		const palabrasFinales = [...todas, repetido];
+		palabrasFinales.sort(() => 0.5 - Math.random());
+
+		// Agrupar según grupo
+		let i = 0;
+		while (i < palabrasFinales.length) {
+		  const grupoPalabras = palabrasFinales.slice(i, i + grupo);
+		  secuencia.push(grupoPalabras.join(' '));
+		  i += grupo;
+		}
+
+		// candidatos individuales (para las preguntas)
+		candidatos = [...todas, noAparecido];
+		candidatos.sort(() => 0.5 - Math.random());
+	  }
+	}
+
+
+
+
+	function mostrarSecuencia(index, tiempo) {
+	  if (!enEjecucion) return;
+
+	  if (index >= secuencia.length) {
+		eliminarElemento();
+		mostrarPreguntas();
+		detenerJuego(true);
+		return;
+	  }
+
+	  mostrarElemento(secuencia[index]);
+
+	  intervalo = setTimeout(() => {
+		eliminarElemento();
+		setTimeout(() => mostrarSecuencia(index + 1, tiempo), 300);
+	  }, tiempo);
+	}
+
+	function mostrarElemento(texto) {
+	  eliminarElemento(); // Borrar anterior
+	  const gameArea = document.getElementById("game-area");
+	  const elemento = document.createElement("div");
+	  elemento.className = "flotante";
+	  elemento.textContent = texto;
+
+	  const maxX = gameArea.clientWidth - 100;
+	  const maxY = gameArea.clientHeight - 50;
+
+	  const x = Math.floor(Math.random() * maxX);
+	  const y = Math.floor(Math.random() * maxY);
+
+	  elemento.style.left = x + "px";
+	  elemento.style.top = y + "px";
+
+	  gameArea.appendChild(elemento);
+	}
+
+	function eliminarElemento() {
+	  const existente = document.querySelector("#game-area .flotante");
+	  if (existente) {
+		existente.remove();
+	  }
+	}
+
+
+    function mostrarPreguntas() {
+      const opcionesRepetido = document.getElementById("opcion-repetido");
+      const opcionesNoAparecido = document.getElementById("opcion-no-aparecido");
+
+      opcionesRepetido.innerHTML = "";
+      opcionesNoAparecido.innerHTML = "";
+
+      candidatos.forEach(op => {
+        const option1 = document.createElement("option");
+        option1.value = op;
+        option1.textContent = op;
+        opcionesRepetido.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = op;
+        option2.textContent = op;
+        opcionesNoAparecido.appendChild(option2);
+      });
+
+      document.getElementById("preguntas").style.display = "block";
+    }
+
+    function comprobarRespuestas() {
+      const repetidoSel = document.getElementById("opcion-repetido").value;
+      const noAparecidoSel = document.getElementById("opcion-no-aparecido").value;
+
+      let resultado = "";
+
+      if (repetidoSel === repetido) {
+        resultado += "✅ ¡Correcto el repetido! ";
+      } else {
+        resultado += "❌ Error en el repetido. ";
+      }
+
+      if (noAparecidoSel === noAparecido) {
+        resultado += "✅ ¡Correcto el no aparecido!";
+      } else {
+        resultado += "❌ Error en el no aparecido.";
+      }
+
+      document.getElementById("feedback").textContent = resultado;
+    }
+
+    function detenerJuego(finalizado = false) {
+      clearTimeout(intervalo);
+      enEjecucion = false;
+      document.getElementById("start-btn").disabled = false;
+      document.getElementById("stop-btn").disabled = true;
+
+      if (!finalizado) {
+        document.getElementById("preguntas").style.display = "none";
+        document.getElementById("feedback").textContent = "⏹️ Ejercicio detenido.";
+      }
+    }
+	function actualizarTamanoArea() {
+	  const seleccion = document.getElementById("tamano-area").value;
+	  const [ancho, alto] = seleccion.split("x").map(Number);
+	  const gameArea = document.getElementById("game-area");
+	  gameArea.style.width = ancho + "px";
+	  gameArea.style.height = alto + "px";
+	}
+	
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (enEjecucion) {
+			detenerJuego();
+		} else {
+		   iniciarJuego();
+		}
+	  }
+	});
+
+  </script>
+
+</body>
+</html>

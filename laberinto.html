@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
   <title>Laberinto de Direcciones</title>
   <style>
@@ -87,6 +88,7 @@
   </style>
 </head>
 <body>
+  <!-- By BorjaPintos -->
   <h1>🧭 Laberinto</h1>
   <label>Número de indicaciones: <input type="number" id="num-arrows" value="5" min="1" max="20" onchange="resetRacha()"></label>
   <br>
@@ -287,6 +289,15 @@
       clearInterval(cronometroInterval);
       location.reload();
     }
+	
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (!juegoActivo) {
+			startGame();
+		}
+	  }
+	});
 
     window.onload = generateGrid;
   </script>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
   <title>Memoria Binaria</title>
   <style>
@@ -59,7 +60,7 @@
   </style>
 </head>
 <body>
-
+  <!-- By BorjaPintos -->
   <h1>🤖 Memoria Binaria</h1>
   <div id="config">
     <label>Segmentos (ej: 1 1, 2 3):
@@ -104,11 +105,12 @@
     let tiempoIniciado = false;
     let tiempoInicio = null;
     let cronometroInterval = null;
-
+    let juegoIniciado = false;
     let rachaAciertos = 0;
     let ultimaConfig = { segmentos: "", tiempo: 0 };
 
     function generarNumero() {
+	  juegoIniciado = true;
       const segmentoStr = document.getElementById("segments").value.trim();
       const displayTimeValue = parseInt(document.getElementById("display-time").value);
 
@@ -171,7 +173,7 @@
       const userValue = document.getElementById("user-input").value.replace(/\s+/g, '');
       const resultado = document.getElementById("resultado");
       intentos++;
-
+      juegoIniciado = false;
       let html = '';
       let index = 0;
       for (let seg of segmentosActivos) {
@@ -235,10 +237,14 @@
       location.reload();
     }
 	
-	document.getElementById("user-input").addEventListener("keydown", function(event) {
+	document.addEventListener("keydown", function(event) {
 	  if (event.key === "Enter") {
 		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
-		mostrarOriginal();   // Llama a tu función de comprobación
+		if (juegoIniciado) {
+			mostrarOriginal();   // Llama a tu función de comprobación
+		} else {
+		   generarNumero();
+		}
 	  }
 	});
   </script>

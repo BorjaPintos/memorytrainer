@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- By BorjaPintos -->
   <meta charset="UTF-8">
 
   <title>Identificador de Notas Musicales</title>
@@ -58,7 +59,7 @@
   </style>
 </head>
 <body>
-
+  <!-- By BorjaPintos -->
   <h1>🎶 🎯 Memorización de Notas</h1>
 
   <div id="config">
@@ -164,13 +165,13 @@
 
 	let indiceActual = 0;
 	let botonesHabilitados = false;
-
+	let juegoIniciado = false;
 
     let claveActual = 'sol';
 
     function generarNota() {
 	  document.getElementById("btn-iniciar").disabled = true;
-
+      juegoIniciado = true;
 	  const botones = document.querySelectorAll(".note-button");
 	  botones.forEach(btn => btn.disabled = true);
 
@@ -373,6 +374,7 @@
 		    document.getElementById("feedback").textContent = "✅ ¡Secuencia completa!";
 		  }
 		  document.getElementById("btn-iniciar").disabled = false; // habilitar botón
+		  juegoIniciado = false;
 		} else {
 		  document.getElementById("feedback").textContent = `✅ Correcto. Nota ${indiceActual + 1}`;
 		}
@@ -394,42 +396,17 @@
 	function reiniciarTodo() {
 	  const confirmar = confirm("¿Seguro que quieres reiniciar todo? Se perderán tus estadísticas y el tiempo transcurrido.");
 	  if (!confirmar) return;
-	  // Reset de estadísticas
-	  totalAciertos = 0;
-	  totalClics = 0;
-	  secuenciasPerfectas = 0;
-	  nSecuencias=0
-	  huboFallosEnSecuencia = false;
-
-	  document.getElementById("aciertos").textContent = "0";
-	  document.getElementById("clics").textContent = "0";
-	  document.getElementById("secuencias").textContent = "0";
-	  document.getElementById("secuenciasperfectas").textContent = "0";
-
-	  // Reset cronómetro
-	  tiempoIniciado = false;
-	  tiempoInicio = null;
-	  clearInterval(cronometroInterval);
-	  cronometroInterval = null;
-	  document.getElementById("cronometro").textContent = "00:00";
-
-	  // Limpiar pentagrama y feedback
-	  document.getElementById("grupo-notas").innerHTML = "";
-	  document.getElementById("lineas-adicionales").innerHTML = "";
-	  document.getElementById("lineas-pentagrama").innerHTML = "";
-	  document.getElementById("feedback").textContent = "Pulsa Iniciar para empezar a jugar";
-
-	  // Volver a mostrar claves ocultas
-	  document.getElementById("clave-sol").setAttribute("visibility", "hidden");
-	  document.getElementById("clave-fa").setAttribute("visibility", "hidden");
-
-	  // Activar botón iniciar
-	  document.getElementById("btn-iniciar").disabled = false;
-	  
-	  rachaPerfecta = 0;
-	  document.getElementById("mensaje-dificultad").textContent = '';
-	  ultimaConfig = { clave: "", cantidad: 0, tiempo: 0 };
+	  location.reload();
 	}
+	
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (!juegoIniciado) {
+			generarNota();  
+		} 
+	  }
+	});
 
 
   </script>

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <!-- By BorjaPintos -->
   <title>Entrenador de Memoria</title>
   <style>
     body {
@@ -57,7 +58,7 @@
   </style>
 </head>
 <body>
-
+  <!-- By BorjaPintos -->
   <h1>🔢 Memoria Numérica</h1>
   <div id="config">
   <label>Segmentos (ej: 2 2 2 ó 1 1 3):
@@ -96,6 +97,7 @@
 
     let numeroOriginal = "";
     let numeroFormateado = "";
+	let juegoIniciado = false;
 
     let aciertos = 0;
     let intentos = 0;
@@ -109,6 +111,7 @@
 
 
     function generarNumero() {
+	  juegoIniciado = true;
       const segmentoStr = document.getElementById("segments").value.trim();
 	  const displayTimeValue = parseInt(document.getElementById("display-time").value);
 	  if (
@@ -167,7 +170,7 @@
 	  const userValue = document.getElementById("user-input").value.replace(/\s+/g, '');
 	  const resultado = document.getElementById("resultado");
 	  intentos++;
-
+      juegoIniciado = false;
 	  if (userValue === numeroOriginal) {
 	    aciertos++;
 	    rachaAciertos++;
@@ -253,10 +256,14 @@
       location.reload();
     }
 	
-	document.getElementById("user-input").addEventListener("keydown", function(event) {
+	document.addEventListener("keydown", function(event) {
 	  if (event.key === "Enter") {
 		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
-		mostrarOriginal();   // Llama a tu función de comprobación
+		if (juegoIniciado) {
+			mostrarOriginal();   // Llama a tu función de comprobación
+		} else {
+		   generarNumero();
+		}
 	  }
 	});
   </script>
