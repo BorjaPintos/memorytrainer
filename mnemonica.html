@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Memoria - Cartas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    button, select, input {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .card-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+    .feedback {
+      font-weight: bold;
+      font-size: 18px;
+    }
+	#pregunta {
+      font-weight: bold;
+      font-size: 18px;
+    }
+	.selected {
+	  background-color: #4CAF50;
+	  color: white;
+	  border: 2px solid #2e7d32;
+	}
+
+  </style>
+</head>
+<body>
+  <h1>🧠 Juego de Memoria - Cartas</h1>
+
+  <label for="modo">Modo de juego:</label>
+  <select id="modo">
+    <option value="carta">Adivinar Carta por Posición</option>
+    <option value="posicion">Adivinar Posición por Carta</option>
+  </select>
+
+  <div id="juego">
+    <p id="pregunta"></p>
+    <div id="respuesta">
+      <div id="seleccion-carta" style="display:none;">
+        <div class="card-buttons" id="numeros">
+          <!-- botones de número -->
+        </div>
+        <div class="card-buttons" id="palos">
+          <!-- botones de palo -->
+        </div>
+      </div>
+      <div id="seleccion-posicion" style="display:none;">
+        <input type="number" id="input-posicion" placeholder="Introduce la posición (1-52)">
+      </div>
+    </div>
+    <button onclick="comprobar()">Comprobar</button>
+    <button onclick="nuevaPregunta()">🔄 Nueva Pregunta</button>
+  </div>
+  <p class="feedback" id="feedback"></p>
+  
+  <hr>
+  <button onclick="toggleListado()">▼ Ver listado completo</button>
+   <div id="listado-completo" style="display: none; margin-top: 10px; padding: 10px; background: #f9f9f9; border: 1px solid #ccc; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; white-space: pre-wrap;"></div>
+
+
+  <script>
+    const posiciones = {
+      1: "4 ♣️", 2: "2 ♥️", 3: "7 ♦️", 4: "3 ♣️", 5: "4 ♥️",
+      6: "6 ♦️", 7: "As ♠️", 8: "5 ♥️", 9: "9 ♠️", 10: "2 ♠️",
+      11: "Q ♥️", 12: "3 ♦️", 13: "Q ♣️", 14: "8 ♥️", 15: "6 ♠️",
+      16: "5 ♠️", 17: "9 ♥️", 18: "K ♣️", 19: "2 ♦️", 20: "J ♥️",
+      21: "3 ♠️", 22: "8 ♠️", 23: "6 ♥️", 24: "10 ♣️", 25: "5 ♦️",
+      26: "K ♦️", 27: "2 ♣️", 28: "3 ♥️", 29: "8 ♦️", 30: "5 ♣️",
+      31: "K ♠️", 32: "J ♦️", 33: "8 ♣️", 34: "10 ♠️", 35: "K ♥️",
+      36: "J ♣️", 37: "7 ♠️", 38: "10 ♥️", 39: "As ♦️", 40: "4 ♠️",
+      41: "7 ♥️", 42: "4 ♦️", 43: "As ♣️", 44: "9 ♣️", 45: "J ♠️",
+      46: "Q ♦️", 47: "7 ♣️", 48: "Q ♠️", 49: "10 ♦️", 50: "6 ♣️",
+      51: "As ♥️", 52: "9 ♦️"
+    };
+
+    const numeros = ["As", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    const palos = ["♥️", "♠️", "♣️", "♦️"];
+    let modo = "carta";
+    let preguntaActual = null;
+
+    document.getElementById("modo").addEventListener("change", e => {
+      modo = e.target.value;
+      nuevaPregunta();
+    });
+
+	function crearBotones() {
+	  const nums = document.getElementById("numeros");
+	  const suits = document.getElementById("palos");
+	  nums.innerHTML = suits.innerHTML = "";
+
+	  numeros.forEach(n => {
+		const b = document.createElement("button");
+		b.textContent = n;
+		b.onclick = () => {
+		  document.querySelectorAll("#numeros button").forEach(btn => btn.classList.remove("selected"));
+		  b.classList.add("selected");
+		  intentarComprobar();
+		};
+		nums.appendChild(b);
+	  });
+
+	  palos.forEach(p => {
+		const b = document.createElement("button");
+		b.textContent = p;
+		b.onclick = () => {
+		  document.querySelectorAll("#palos button").forEach(btn => btn.classList.remove("selected"));
+		  b.classList.add("selected");
+		  intentarComprobar();
+		};
+		suits.appendChild(b);
+	  });
+	}
+
+	function intentarComprobar() {
+	  const num = document.querySelector("#numeros .selected");
+	  const palo = document.querySelector("#palos .selected");
+	  if (num && palo) {
+		comprobar();
+	  }
+	}
+
+
+
+    function nuevaPregunta() {
+      document.getElementById("feedback").textContent = "";
+      crearBotones();
+      if (modo === "carta") {
+        const pos = Math.floor(Math.random() * 52) + 1;
+        preguntaActual = pos;
+        document.getElementById("pregunta").textContent = `¿Qué carta está en la posición ${pos}?`;
+        document.getElementById("seleccion-carta").style.display = "block";
+        document.getElementById("seleccion-posicion").style.display = "none";
+      } else {
+        const claves = Object.entries(posiciones);
+        const [pos, carta] = claves[Math.floor(Math.random() * claves.length)];
+        preguntaActual = [pos, carta];
+        document.getElementById("pregunta").textContent = `¿En qué posición está la carta ${carta}?`;
+        document.getElementById("seleccion-carta").style.display = "none";
+        document.getElementById("seleccion-posicion").style.display = "block";
+        document.getElementById("input-posicion").value = "";
+      }
+    }
+
+    function comprobar() {
+      const feedback = document.getElementById("feedback");
+      if (modo === "carta") {
+        const num = document.querySelector("#numeros .selected");
+        const palo = document.querySelector("#palos .selected");
+        if (!num || !palo) {
+          feedback.textContent = "❌ Selecciona número y palo.";
+          return;
+        }
+        const respuesta = `${num.textContent} ${palo.textContent}`.toLowerCase();
+        const correcta = posiciones[preguntaActual].toLowerCase();
+        feedback.textContent = respuesta === correcta ? "✅ Correcto!" : `❌ Incorrecto. Era: ${posiciones[preguntaActual]}`;
+      } else {
+        const valor = document.getElementById("input-posicion").value;
+        if (!valor) {
+          feedback.textContent = "❌ Introduce una posición.";
+          return;
+        }
+        feedback.textContent = valor == preguntaActual[0] ? "✅ Correcto!" : `❌ Incorrecto. Era: ${preguntaActual[0]}`;
+      }
+    }
+
+	function toggleListado() {
+		const div = document.getElementById("listado-completo");
+		if (div.style.display === "none") {
+		  let contenido = "";
+		  for (let i = 1; i <= 52; i++) {
+			contenido += `${i.toString().padStart(2, '0')}: ${posiciones[i]}\n`;
+		  }
+		  div.textContent = contenido;
+		  div.style.display = "block";
+		} else {
+		  div.style.display = "none";
+		}
+	  }
+
+    nuevaPregunta();
+  </script>
+
+
+</body>
+</html>
