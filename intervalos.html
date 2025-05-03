@@ -71,7 +71,10 @@
       <option value="440">A4 (440Hz)</option>
       <option value="aleatorio">Aleatoria</option>
     </select>
-  </label>
+  </label> 	
+  <label>retentiva:
+    <input type="number" id="retentiva-time" value="0" min="0">
+  </label><br>
     <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
   <br>
   <button id="btn-escuchar" onclick="iniciarJuego()">🎧 Escuchar</button>
@@ -122,7 +125,7 @@
       document.getElementById("btn-escuchar").disabled = true;
       document.getElementById("indicador").textContent = "👂 Atento al sonido...";
 	  document.getElementById("indicador").style.color = "black";
-
+      const retentiva = parseInt(document.getElementById("retentiva-time").value)*1000; 
       const cantidad = 2;
       const direccion = document.getElementById('direccion').value;
       const baseSeleccion = document.getElementById('nota-base').value;
@@ -148,10 +151,16 @@
         reproducirTono(freq, contexto.currentTime + i * delay);
       }
 
+	  time = delay * cantidad * 1000
+
       setTimeout(() => {
+        document.getElementById("indicador").textContent = "🥶 Aguanta!!";
+      }, time);
+	  
+	  setTimeout(() => {
         activarBotones();
         document.getElementById("indicador").textContent = "❓ ¿Qué intervalo era?";
-      }, delay * cantidad * 1000);
+      }, time + retentiva);
 
       intentos++;
       actualizarStats();

@@ -76,6 +76,9 @@
   <label>Segundos visibles:
     <input type="number" id="tiempo-visible" value="3" min="1" style="width: 50px;">
   </label><br>
+   <label>retentiva:
+    <input type="number" id="retentiva-time" value="0" min="0">
+  </label><br>
   <div>
 
   <div id="mensaje-dificultad" style="margin-top: 10px; font-size: 16px; color: orange;"></div>
@@ -148,7 +151,7 @@
 
     ];
     let rachaPerfecta = 0;
-    let ultimaConfig = { clave: "", cantidad: 0, tiempo: 0 };
+    let ultimaConfig = { clave: "", cantidad: 0, tiempo: 0, retentiva:0 };
 
 	let tiempoIniciado = false;
 	let tiempoInicio = null;
@@ -178,18 +181,21 @@
 	  const claveSeleccionada  = document.getElementById("clave").value;
 	  const cantidad = parseInt(document.getElementById("cantidad-notas").value);
 	  const tiempoVisible = parseInt(document.getElementById("tiempo-visible").value) * 1000;
+	  const retentiva = parseInt(document.getElementById("retentiva-time").value) * 1000;
 	  
 	  if (
 		  claveSeleccionada  !== ultimaConfig.clave ||
 		  cantidad !== ultimaConfig.cantidad ||
-		  tiempoVisible !== ultimaConfig.tiempo
+		  tiempoVisible !== ultimaConfig.tiempo ||
+		  retentiva !== ultimaConfig.retentiva
 		) {
 		  rachaPerfecta = 0;
 		  document.getElementById("mensaje-dificultad").textContent = '';
 		  ultimaConfig = {
 			clave: claveSeleccionada ,
 			cantidad: cantidad,
-			tiempo: tiempoVisible
+			tiempo: tiempoVisible,
+			retentiva: retentiva
 		  };
 		}
 	  
@@ -256,6 +262,7 @@
 	  
 	  // Ocultar después de tiempoVisible
 	  setTimeout(() => {
+	    document.getElementById("feedback").textContent = "🥶 Aguanta!!";
 	    for (let i = 0; i < notasSecuencia.length; i++) {
 		  const notaElem = document.getElementById(`nota-${i}`);
 		  if (notaElem) notaElem.setAttribute("visibility", "hidden");
@@ -274,11 +281,16 @@
 			  }
 			}
 	    }
+		
+
+	  }, tiempoVisible);
+	  
+	  setTimeout(() => {
 	    botonesHabilitados = true;
 		botones.forEach(btn => btn.disabled = false);
 		document.getElementById("feedback").textContent = "🔍 Ahora pulsa las notas en orden";
 
-	  }, tiempoVisible);
+	  }, tiempoVisible+retentiva);
 	  
 	  const spacing = 60; // separación entre notas
 	  const svgPadding = 100; // margen para clave y laterales

@@ -86,10 +86,14 @@
     <label>Número de dígitos/palabras juntos:
       <input type="number" id="grupo" value="2" min="1" max="5">
     </label><br>
-
+	
     <label>Tiempo visible (ms):
       <input type="number" id="tiempo" value="1000" min="100">
     </label><br>
+	
+	<label>retentiva:
+    <input type="number" id="retentiva-time" value="0" min="0">
+  </label><br>
 
     <label>Área de juego:
       <select id="tamano-area" onchange="actualizarTamanoArea()">
@@ -162,6 +166,7 @@
 	  feedback.style.color = "black";
       document.getElementById("respuesta").disabled = true;
       document.getElementById("btn-comprobar").disabled = true;
+	  document.getElementById("respuesta").value = "";
       animarEncuentro();
     }
 
@@ -191,6 +196,7 @@
 		document.getElementById("feedback").textContent = "🤯🤯🤯";
 		lanzarUnaAparicion();
 	  }, 1600); // 1000ms de mover + 500ms de hacer pequeños + un pelín extra
+	  
 	}
 
 
@@ -198,6 +204,7 @@
 	  const modo = document.getElementById("modo").value;
 	  const grupo = parseInt(document.getElementById("grupo").value);
 	  const tiempo = parseInt(document.getElementById("tiempo").value);
+	  const retentiva = parseInt(document.getElementById("retentiva-time").value)*1000;
 	  respuestasCorrectas = [];
 
 	  const gameArea = document.getElementById("game-area");
@@ -218,16 +225,9 @@
 	  }
 
 	  setTimeout(() => {
-		limpiarPantalla();  // ⬅️ Ahora sí, ya no nos afecta
-		document.getElementById("respuesta").disabled = false;
-		 document.getElementById("btn-comprobar").disabled = false;
-		document.getElementById("feedback").textContent = "👀 ¿Qué viste? "
-		document.getElementById("respuesta").value = "";         // Limpiar input
-		document.getElementById("respuesta").focus();            // Poner foco
-
-		
+		limpiarPantalla();
+		document.getElementById("feedback").textContent = "🥶 Aguanta!!"
 		posiciones = posicionesGuardadas.map(p => ({ x: p.x, y: p.y })); 
-
 		// ✅ USAR posicionesGuardadas para recrear los puntos
 		posicionesGuardadas.forEach(p => {
 		  const punto = document.createElement("div");
@@ -238,8 +238,18 @@
 		  gameArea.appendChild(punto);
 		});
 
-		document.getElementById("start-btn").disabled = false;
 	  }, tiempo);
+	  
+	  setTimeout(() => {
+		document.getElementById("respuesta").disabled = false;
+		document.getElementById("btn-comprobar").disabled = false;
+		document.getElementById("feedback").textContent = "👀 ¿Qué viste? "
+		document.getElementById("respuesta").value = "";         // Limpiar input
+		document.getElementById("respuesta").focus();            // Poner foco
+
+
+		document.getElementById("start-btn").disabled = false;
+	  }, tiempo+retentiva);
 	}
 
 

@@ -70,6 +70,10 @@
     <label>Segundos que se muestra:
       <input type="number" id="display-time" value="3" min="1">
     </label><br>
+	
+   <label>retentiva:
+    <input type="number" id="retentiva-time" value="0" min="0">
+    </label><br>
   </div>
 
   <div id="mensaje-dificultad" style="margin-top: 10px; font-size: 18px; color: orange;"></div>
@@ -107,25 +111,27 @@
     let cronometroInterval = null;
     let juegoIniciado = false;
     let rachaAciertos = 0;
-    let ultimaConfig = { segmentos: "", tiempo: 0 };
+    let ultimaConfig = { segmentos: "", tiempo: 0, retentiva: 0 };
 
     function generarNumero() {
 	  juegoIniciado = true;
       const segmentoStr = document.getElementById("segments").value.trim();
       const displayTimeValue = parseInt(document.getElementById("display-time").value);
-
+	  const retentivaTime = parseInt(document.getElementById("retentiva-time").value);
       if (
         segmentoStr !== ultimaConfig.segmentos ||
-        displayTimeValue !== ultimaConfig.tiempo
+        displayTimeValue !== ultimaConfig.tiempo || 
+		retentivaTime !== ultimaConfig.retentiva
       ) {
         rachaAciertos = 0;
         document.getElementById("mensaje-dificultad").textContent = '';
-        ultimaConfig = { segmentos: segmentoStr, tiempo: displayTimeValue };
+        ultimaConfig = { segmentos: segmentoStr, tiempo: displayTimeValue, retentiva: retentivaTime};
       }
 
       const segmentos = segmentoStr.split(" ").map(s => parseInt(s)).filter(n => !isNaN(n) && n > 0);
       segmentosActivos = [...segmentos];
       const tiempo = displayTimeValue * 1000;
+	  const retentiva = retentivaTime * 1000;
 
       if (segmentos.length === 0) {
         alert("Debes introducir al menos un segmento válido.");
@@ -157,12 +163,18 @@
 
       setTimeout(() => {
         document.getElementById("number-display").textContent = "";
+		document.getElementById("resultado").textContent = '🥶 Aguanta!!';
+		resultado.style.color = "black";
+      }, tiempo);
+	  
+	  setTimeout(() => {
+        document.getElementById("number-display").textContent = "";
         document.getElementById("user-input").disabled = false;
         document.getElementById("check").disabled = false;
         document.getElementById("resultado").textContent = '🔍 ¿Cuál era la secuencia binaria?';
         resultado.style.color = "black";
 		document.getElementById("user-input").focus();
-      }, tiempo);
+      }, tiempo+retentiva);
 
       document.getElementById("user-input").value = "";
       document.getElementById("mostrar-btn").disabled = true;

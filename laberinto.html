@@ -94,6 +94,10 @@
   <br>
   <label>Segundos visibles: <input type="number" id="show-time" value="3" min="1" onchange="resetRacha()"></label>
   <br>
+  <label>retentiva:
+    <input type="number" id="retentiva-time" value="0" min="0" onchange="resetRacha()">
+  </label><br>
+  <div id="mensaje-dificultad"></div>
   <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
   <br>
   <button id="start-btn" onclick="startGame()">Iniciar</button>
@@ -102,7 +106,7 @@
   <div id="arrows-display"></div>
   <div id="grid"></div>
   <p id="feedback">Pulsa Iniciar para empezar el juego</p>
-  <div id="mensaje-dificultad"></div>
+
   <div id="stats">
     <p>✅ Secuencias perfectas: <span id="perfectas">0</span> / <span id="totales">0</span></p>
   </div>
@@ -139,6 +143,7 @@
 
       const n = parseInt(document.getElementById('num-arrows').value);
       const time = parseInt(document.getElementById('show-time').value) * 1000;
+	  const retentiva = parseInt(document.getElementById('retentiva-time').value) * 1000;
 
       const shapes = ['', 'round', 'hex', 'oct'];
       shapeClass = shapes[Math.floor(Math.random() * shapes.length)];
@@ -176,11 +181,15 @@
 
       setTimeout(() => {
         document.getElementById('arrows-display').innerHTML = '';
-        document.getElementById('grid').style.display = 'grid';
+		document.getElementById('feedback').textContent = '🥶 Aguanta!!';
+      }, time);
+	  
+	  setTimeout(() => {
         enableClicks();
+		document.getElementById('grid').style.display = 'grid';
         document.querySelector(`#cell-${startX}-${startY}`).classList.add('start');
 		document.getElementById('feedback').textContent = '🧭 ¿Dónde está el final?';
-      }, time);
+      }, time+retentiva);
     }
 
     function resetRacha() {

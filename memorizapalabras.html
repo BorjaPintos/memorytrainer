@@ -84,6 +84,9 @@
   <label>Segundos visibles:
     <input type="number" id="tiempo-visible" value="3" min="1">
   </label></br>
+  <label>retentiva:
+      <input type="number" id="retentiva-time" value="0" min="0">
+   </label><br>
   <label>Modo:
     <select id="modo">
       <option value="orden">En orden</option>
@@ -162,6 +165,7 @@
       await cargarPalabras();
       const cantidad = parseInt(document.getElementById('num-palabras').value);
       const tiempo = parseInt(document.getElementById('tiempo-visible').value) * 1000;
+	  const retentiva = parseInt(document.getElementById('retentiva-time').value) * 1000;
       modo = document.getElementById('modo').value;
 
       secuencia = [];
@@ -192,9 +196,13 @@
 
       setTimeout(() => {
         document.querySelectorAll('.palabra').forEach(p => p.classList.add('oculta'));
+		document.getElementById("feedback").textContent = "🥶 Aguanta!!";
+      }, tiempo);
+	  
+	  setTimeout(() => {
 		document.getElementById("feedback").textContent = "";
         mostrarEntrada();
-      }, tiempo);
+      }, tiempo+retentiva);
     }
 
     function mostrarEntrada() {
@@ -323,6 +331,10 @@
 	});
 
 	document.getElementById("tiempo-visible").addEventListener("change", () => {
+	  rachaPerfectas = 0;
+	  document.getElementById("mensaje-dificultad").textContent = "";
+	});
+	document.getElementById("retentiva-time").addEventListener("change", () => {
 	  rachaPerfectas = 0;
 	  document.getElementById("mensaje-dificultad").textContent = "";
 	});

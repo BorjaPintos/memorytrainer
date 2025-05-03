@@ -90,6 +90,9 @@
     <label>Segundos visibles:
       <input type="number" id="view-time" value="3" min="1">
     </label><br>
+	<label>retentiva:
+      <input type="number" id="retentiva-time" value="0" min="0">
+    </label><br>
     <label>Modo:
       <select id="modo">
         <option value="orden">Orden</option>
@@ -125,7 +128,7 @@
     let inicioTiempo = null;
     let cronometroInterval = null;
     let rachaPerfecta = 0;
-    let configInicial = { puntos: 5, segundos: 3 };
+    let configInicial = { puntos: 5, segundos: 3, retentiva: 0 };
     let modoJuego = "orden";
     let indicesPendientes = [];
     let juegoIniciado = false;
@@ -141,15 +144,17 @@
 
       const numPoints = parseInt(document.getElementById('num-points').value);
       const viewTime = parseInt(document.getElementById('view-time').value) * 1000;
+	  const retentivaTime = parseInt(document.getElementById('retentiva-time').value) * 1000;
       modoJuego = document.getElementById('modo').value;
 
       if (
         numPoints !== configInicial.puntos ||
-        viewTime !== configInicial.segundos
+        viewTime !== configInicial.segundos ||
+        retentivaTime !== configInicial.retentiva
       ) {
         rachaPerfecta = 0;
         document.getElementById('mensaje-dificultad').textContent = '';
-        configInicial = { puntos: numPoints, segundos: viewTime };
+        configInicial = { puntos: numPoints, segundos: viewTime, retentiva: retentivaTime };
       }
 
       const gameArea = document.getElementById('game-area');
@@ -199,6 +204,10 @@
 
       setTimeout(() => {
         points.forEach(p => p.classList.add('hidden'));
+		document.getElementById('feedback').textContent = '🥶 Aguanta!!';
+      }, viewTime);
+	  
+	  setTimeout(() => {
         clickable = true;
         expected = 1;
 
@@ -209,7 +218,7 @@
           expected = indicesPendientes.shift();
           document.getElementById('feedback').textContent = `🔍 ¿Dónde está el número ${expected}?`;
         }
-      }, viewTime);
+      }, viewTime+retentivaTime);
 
       totalJuegos++;
       huboFalloEnEstaSecuencia = false;

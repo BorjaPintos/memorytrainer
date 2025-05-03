@@ -80,6 +80,9 @@
     <input type="number" id="tiempo-visible" value="3" min="1">
   </label>
   <br>
+  <label>retentiva:
+    <input type="number" id="retentiva-time" value="0" min="0">
+  </label><br>
   <div id="mensaje-dificultad"></div>
   <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
   <button id="btn-iniciar" onclick="iniciarJuego()">Iniciar</button>
@@ -123,7 +126,7 @@
     let cronometro;
     let puedeSeleccionar = false;
     let rachaPerfectas = 0;
-    let ultimaConfig = { manos: 3, tiempo: 3 };
+    let ultimaConfig = { manos: 3, tiempo: 3, retentiva:0 };
 	let juegoIniciado = false;
 
     function iniciarJuego() {
@@ -131,11 +134,12 @@
       juegoIniciado = true;
       const cantidad = parseInt(document.getElementById('num-manos').value);
       const tiempo = parseInt(document.getElementById('tiempo-visible').value) * 1000;
+	  const retentiva = parseInt(document.getElementById('retentiva-time').value) * 1000;
 
-      if (cantidad !== ultimaConfig.manos || tiempo !== ultimaConfig.tiempo * 1000) {
+      if (cantidad !== ultimaConfig.manos || tiempo !== ultimaConfig.tiempo || retentiva !== ultimaConfig.retentiva) {
         rachaPerfectas = 0;
         document.getElementById("mensaje-dificultad").textContent = '';
-        ultimaConfig = { manos: cantidad, tiempo: tiempo / 1000 };
+        ultimaConfig = { manos: cantidad, tiempo: tiempo, retentiva: retentiva};
       }
 
       secuencia = [];
@@ -166,9 +170,13 @@
         for (let i = 0; i < cantidad; i++) {
           document.getElementById(`mano-${i}`).classList.add('hidden');
         }
+        actualizarMensaje(`🥶 Aguanta!!`);
+      }, tiempo);
+	  
+	  setTimeout(() => {
         actualizarMensaje(`💡 Tu objetivo: ${modo[0]}`);
         puedeSeleccionar = true;
-      }, tiempo);
+      }, tiempo+retentiva);
 
       jugadas++;
       actualizarStats();
