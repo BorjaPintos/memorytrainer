@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Entrenamiento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      color: #000;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #000000;
+      font-size: 2em;
+    }
+    h2 {
+      color: #000000;
+      font-size: 1.3em;
+      margin-top: 30px;
+    }
+    a {
+      color: #000000;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+    .button:hover {
+      background-color: #005fa3;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 15px;
+      border: 1px solid #ccc;
+      overflow-x: auto;
+      font-size: 14px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>💪 🧠 Guía de Entrenamiento Visual y de Memoria</h1>
+  <p>Es importante llevar un registro de la configuración final de cada ejercicio. Por lo general se empieza en un nivel cómodo, inferior al nivel final del último entrenamiento. Al final de todo tienes una tabla para que puedas usar como base de anotaciones</p>
+
+  <h2>3 minutos. Calentamiento ocular</h2>
+  <p>Lo primero es calentar la vista con el siguiente ejercicio:</p>
+  <a href="ocular1.html">➡️ 👀 Reacción Visual</a>
+  <ul>
+    <li>Empieza con velocidades de <strong>500 → 400 → 300 ms</strong></li>
+    <li>Duración de 40 segundos por ronda</li>
+    <li>Descanso de 20 segundos entre rondas</li>
+  </ul>
+
+  <h2>3 minutos. Visión periférica</h2>
+  <a href="periferica.html">➡️ 👁️👁️ Visión Periférica</a>
+  </br>
+  <p>La dificultad se hará por orden de esta forma:</p>
+  <ul>
+    <li>Reducir tiempo visible hasta 1 segundo</li>
+    <li>Separarlos lo máximo posible en horizontal (evitar diagonales)</li>
+    <li>Agregar más dígitos (3 por marca es razonable)</li>
+    <li>Cambiar a palabras, empezar con una palabra en cada marca</li>
+  </ul>
+
+  <h2>3 minutos. Memoria</h2>
+  <p>Escoge uno de los siguientes ejercicios:</p>
+  <ul>
+    <li><a href="memoria1.html">➡️ 🔢 Memoria numérica</a></li>
+    <li><a href="binario.html">➡️ 🤖 Memoria binaria</a></li>
+    <li><a href="memorizapalabras.html">➡️ 📖 Memoria de palabras</a></li>
+  </ul>
+  <p>Empezar con los valores por defecto e ir subiendo la dificultad cuando nos indique que estamos preparados.</p>
+  <p>La dificultad se hará por orden de esta forma:</p>
+  <ul>
+    <li>Reducir tiempo visible hasta 1 segundo</li>
+    <li>Aumentar cantidad de números a memorizar</li>
+  </ul>
+
+  <h2>3 minutos. Mezcla</h2>
+  
+  <p>Mezclaremos ahora ambos ejercicios haciendo el ejercicio de click en los números: </p>
+  
+  <a href="memoria2.html">➡️ 👁️👁️ 🎯 Clic en orden</a>
+  
+  <p>La dificultad se hará por orden de esta forma:</p>
+  <ul>
+    <li>Reducir tiempo visible hasta 1 segundo</li>
+    <li>Aumentar cantidad de números a memorizar</li>
+  </ul>
+
+  <h2>3 minutos. Retentiva</h2>
+  <p>Vamos a cualquiera de esos ejercicios bajando un par de niveles desde el último que te quedaste, y aumenta retentiva de 1 en 1 cada vez que te indique que pouedes aumentar la dificultad.</p>
+
+  <h2>3 minutos. Mezcla 2</h2>
+  <a href="ocular2.html">➡️ 👀 🧠 Reconoce el Repetido</a>
+  <p>Aumenta la dificultad reduciendo el tiempo visible, y luego añadiendo más dígitos o palabras.</p>
+
+  <h2>3 minutos. Procesamiento</h2>
+  <p>Elige cualquiera de estos ejercicios</p>
+  <ul>
+    <li><a href="casillero.html">➡️ 🔢 📖 Casillero mental</a></li>
+    <li><a href="procesarlectura.html">➡️ 📖 Procesamiento de lectura</a></li>
+  </ul>
+  <p>O uno de estos si quieres combinarlo con retentiva, aunque es opcional</p>
+  <ul>
+    <li><a href="piedrapapeltijeras.html">➡️ ✊✋✌️ Gana o Pierde</a></li>
+    <li><a href="laberinto.html">➡️ 🧭 Laberinto</a></li>
+    <li><a href="musica.html">➡️ 🎶 🎯 Música</a> (solo si te gusta la música) </li> 
+    <li><a href="intervalos.html">➡️ 🎵 Intervalos sonoros</a> (solo si te gusta mucho mucho la música y quieres mejorar el oído)</li>
+  </ul>
+
+  <h2>Tabla de anotaciones</h2>
+  <button class="button" onclick="copiarMarkdown()">📋 Copiar como Markdown</button>
+  <pre id="tabla-markdown">
+| Ejercicio                 | Segmentos/número de puntos/clave/manos… | Segundos que se muestra | Retentiva | Modo |
+|--------------------------|------------------------------------------|--------------------------|-----------|------|
+| Entrenamiento ocular     |                                          |                          |           |      |
+| Visión Periférica        |                                          |                          |           |      |
+| Memoria Numérica         |                                          |                          |           |      |
+| Memoria Binaria          |                                          |                          |           |      |
+| Palabras                 |                                          |                          |           |      |
+| Memorización Rápida      |                                          |                          |           |      |
+| Clic en ¿orden?          |                                          |                          |           |      |
+| Memoria de Parejas       |                                          |                          |           |      |
+| Casillero Mental         |                                          |                          |           |      |
+| Procesamiento de lectura |                                          |                          |           |      |
+| Gana o Pierde            |                                          |                          |           |      |
+| Laberinto                |                                          |                          |           |      |
+| Memorización de Notas    |                                          |                          |           |      |
+| Intervalos Sonoros       |                                          |                          |           |      |
+  </pre>
+</div>
+
+<script>
+  function copiarMarkdown() {
+    const texto = document.getElementById("tabla-markdown").innerText;
+    navigator.clipboard.writeText(texto).then(() => {
+      alert("✅ Tabla copiada en formato Markdown");
+    });
+  }
+</script>
+</body>
+</html>
