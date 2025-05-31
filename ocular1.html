@@ -81,6 +81,9 @@
       <input type="number" id="duracion" value="500" min="100">
     </label>
     <br>
+	<div class="stats">
+       <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+    </div>
     <button id="start-btn" onclick="iniciarEjercicio()">Iniciar</button>
     <button id="stop-btn" onclick="detenerEjercicio()" disabled>Detener</button>
   </div>
@@ -99,11 +102,28 @@
     const gameArea = document.getElementById("game-area");
     const startBtn = document.getElementById("start-btn");
     const stopBtn = document.getElementById("stop-btn");
+	let tiempoIniciado = false;
+	
+	function iniciarCronometro() {
+      tiempoIniciado = true;
+      tiempoInicio = Date.now();
+      cronometroInterval = setInterval(() => {
+        const ahora = Date.now();
+        const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+        const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+        const sec = String(segundos % 60).padStart(2, '0');
+        document.getElementById("cronometro").textContent = `${min}:${sec}`;
+      }, 1000);
+    }
 
     function iniciarEjercicio() {
       contador = 0;
       total = parseInt(document.getElementById("apariciones").value);
       const duracion = parseInt(document.getElementById("duracion").value);
+
+      if (!tiempoIniciado) {
+        iniciarCronometro();
+      }
 
       document.getElementById("feedback").textContent = "👀 Sigue el círculo con la vista...";
 

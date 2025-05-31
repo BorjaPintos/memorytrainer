@@ -83,7 +83,9 @@
       <option value="1000x600">1000x600</option>
     </select>
     </label><br>
-
+	<div class="stats">
+       <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+    </div>
     <button id="start-btn" onclick="iniciarJuego()">Iniciar</button>
     <button id="stop-btn" onclick="detenerJuego()" disabled>Detener</button>
   </div>
@@ -116,6 +118,19 @@
     let noAparecido = "";
     let intervalo;
     let enEjecucion = false;
+	let tiempoIniciado = false;
+	
+	function iniciarCronometro() {
+      tiempoIniciado = true;
+      tiempoInicio = Date.now();
+      cronometroInterval = setInterval(() => {
+        const ahora = Date.now();
+        const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+        const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+        const sec = String(segundos % 60).padStart(2, '0');
+        document.getElementById("cronometro").textContent = `${min}:${sec}`;
+      }, 1000);
+    }
 	
 	async function cargarPalabras() {
 	  if (palabrasDisponibles.length > 0) return; // ✅ Ya hay palabras cargadas por fichero
@@ -158,6 +173,9 @@
       secuencia = [];
       candidatos = [];
       enEjecucion = true;
+	  if (!tiempoIniciado) {
+        iniciarCronometro();
+      }
 
 	  prepararSecuencia();
 	  mostrarSecuencia(0, tiempo);

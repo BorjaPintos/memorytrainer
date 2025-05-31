@@ -69,6 +69,10 @@
 	  <input type="number" id="num-claves" value="1" min="1">
 	</label>
 
+	<div class="stats">
+       <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+    </div>
+
   <div class="key-display" id="clave"></div>
 
   <input type="text" id="respuesta" placeholder="Escribe una asociación...">
@@ -98,7 +102,20 @@
     let claveActual = "";
 	let tiempoClaveInicio = null;
 	let enPartida = false;
+	let tiempoIniciado = false;
 
+
+	function iniciarCronometro() {
+      tiempoIniciado = true;
+      tiempoInicio = Date.now();
+      cronometroInterval = setInterval(() => {
+        const ahora = Date.now();
+        const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+        const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+        const sec = String(segundos % 60).padStart(2, '0');
+        document.getElementById("cronometro").textContent = `${min}:${sec}`;
+      }, 1000);
+    }
 
     async function cargarDatos() {
       datosCasillero = await fetch('casillero.json').then(r => r.json());
@@ -152,6 +169,10 @@
 	  const cantidad = parseInt(document.getElementById("num-claves").value);
 	  const clavesDisponibles = Object.keys(datosCasillero[sistemaActual].casillero);
 	  clavesActuales = [];
+
+     if (!tiempoIniciado) {
+        iniciarCronometro();
+      }
 
 	  while (clavesActuales.length < cantidad) {
 		const aleatoria = clavesDisponibles[Math.floor(Math.random() * clavesDisponibles.length)];
