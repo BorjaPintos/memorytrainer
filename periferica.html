@@ -299,10 +299,11 @@
 
     function comprobarRespuesta() {
       const entrada = document.getElementById("respuesta").value.trim().toLowerCase();
-      const esperado = respuestasCorrectas.join('').toLowerCase();
+      const esperado = respuestasCorrectas.join(' ').toLowerCase();
       const feedback = document.getElementById("feedback");
 
-      if (entrada === esperado) {
+
+      if (entrada.replace(/\s+/g, '') === esperado.replace(/\s+/g, '')) {
         feedback.textContent = "✅ ¡Correcto!";
         feedback.style.color = "green";
       } else {
