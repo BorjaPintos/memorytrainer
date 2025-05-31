@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>♟️ Coordenadas de Ajedrez</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    td {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .white {
+      background-color: #f0d9b5;
+    }
+    .black {
+      background-color: #b58863;
+    }
+    .highlight {
+      background-color: yellow !important;
+    }
+    .wrong {
+      background-color: red !important;
+    }
+    #stats {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+    input {
+      padding: 5px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    .volver {
+      display: block;
+      margin: 40px auto 0;
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #2b5dab;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      text-align: center;
+      width: 200px;
+    }
+    .volver:hover {
+      background-color: #1f4b8a;
+    }
+    .perspectiva {
+      font-size: 32px;
+      margin: 10px;
+    }
+    #info {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>♟️ Coordenadas de Ajedrez</h1>
+  <label>Modo de Juego:
+    <select id="modo-juego">
+      <option value="click">Click en Coordenada</option>
+      <option value="texto">Casilla Resaltada</option>
+    </select>
+  </label>
+  <br>
+  <label>Vista:
+    <select id="modo-vista">
+      <option value="blancas">Blancas</option>
+      <option value="negras">Negras</option>
+      <option value="aleatoria">Aleatoria</option>
+    </select>
+  </label>
+
+  <div class="stats">
+    <p>🕒 Tiempo jugado: <span id="cronometro">00:00</span></p>
+  </div>
+
+  <div id="info"></div>
+
+  <div id="input-texto" style="margin-top: 15px; display: none;">
+    <label>Introduce la coordenada:
+      <input type="text" id="respuesta" placeholder="ej: e4">
+    </label>
+    <button onclick="validarRespuesta()">Comprobar</button>
+  </div>
+
+  <div class="perspectiva" id="pieza-arriba"></div>
+  <div id="tablero"></div>
+  <div class="perspectiva" id="pieza-abajo"></div>
+
+  <div id="stats">
+    ⭐ Aciertos: <span id="aciertos">0</span> |
+    ❌ Fallos: <span id="fallos">0</span>
+  </div>
+
+  <a class="volver" href="index.html">⬅️ Volver al menú</a>
+
+<script>
+  const letras = ['a','b','c','d','e','f','g','h'];
+  let vista = 'blancas';
+  let coordActual = '';
+  let aciertos = 0, fallos = 0;
+  let juegoIniciado = false;
+  let tiempoIniciado = false;
+
+  function generarCoordenada() {
+    const letra = letras[Math.floor(Math.random() * 8)];
+    const numero = Math.floor(Math.random() * 8) + 1;
+    return letra + numero;
+  }
+
+  function actualizarVista() {
+    const modo = document.getElementById("modo-vista").value;
+    vista = (modo === 'aleatoria') ? (Math.random() < 0.5 ? 'blancas' : 'negras') : modo;
+    document.getElementById("pieza-arriba").textContent = vista === 'blancas' ? '♚' : '♔';
+    document.getElementById("pieza-abajo").textContent = vista === 'blancas' ? '♔' : '♚';
+  }
+
+  function construirTablero() {
+    let contenedor = document.getElementById("tablero");
+    contenedor.innerHTML = "";
+    let table = document.createElement("table");
+
+    let ordenFilas = vista === 'negras' ? [...Array(8)].map((_,i)=>i+1) : [...Array(8)].map((_,i)=>8-i);
+    let ordenCols = vista === 'negras' ? [...letras].reverse() : [...letras];
+
+    for (let i = 0; i < 8; i++) {
+      let row = document.createElement("tr");
+      for (let j = 0; j < 8; j++) {
+        let cell = document.createElement("td");
+        let coord = ordenCols[j] + ordenFilas[i];
+        cell.dataset.coord = coord;
+        cell.className = (i + j) % 2 === 0 ? 'white' : 'black';
+        cell.onclick = () => comprobarClick(coord, cell);
+        row.appendChild(cell);
+      }
+      table.appendChild(row);
+    }
+    contenedor.appendChild(table);
+  }
+
+  function iniciarRonda() {
+    if (!tiempoIniciado) {
+       iniciarCronometro();
+    }
+    actualizarVista();
+    construirTablero();
+    coordActual = generarCoordenada();
+
+    const modoJuego = document.getElementById("modo-juego").value;
+    const info = document.getElementById("info");
+    document.querySelectorAll('td').forEach(td => td.classList.remove('highlight', 'wrong'));
+
+    if (modoJuego === 'click') {
+      document.getElementById("input-texto").style.display = 'none';
+      info.style.color = 'black';
+      info.textContent = `Busca la casilla: ${coordActual}`;
+    } else {
+	  juegoIniciado = true;
+      document.getElementById("input-texto").style.display = 'block';
+	  document.getElementById("respuesta").value = ""
+      info.style.color = 'black';
+      info.textContent = `Identifica la coordenada de la casilla resaltada:`;
+      const celda = document.querySelector(`td[data-coord='${coordActual}']`);
+      if (celda) celda.classList.add('highlight');
+	  document.getElementById("respuesta").focus()
+    }
+  }
+  
+  function iniciarCronometro() {
+      tiempoIniciado = true;
+      tiempoInicio = Date.now();
+      cronometroInterval = setInterval(() => {
+        const ahora = Date.now();
+        const segundos = Math.floor((ahora - tiempoInicio) / 1000);
+        const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+        const sec = String(segundos % 60).padStart(2, '0');
+        document.getElementById("cronometro").textContent = `${min}:${sec}`;
+      }, 1000);
+   }
+
+  function comprobarClick(coord, celda) {
+    if (document.getElementById("modo-juego").value !== 'click') return;
+    if (coord === coordActual) {
+      aciertos++;
+      iniciarRonda();
+    } else {
+      celda.classList.add("wrong");
+      fallos++;
+    }
+    actualizarStats();
+  }
+
+  function validarRespuesta() {
+    
+    let respuesta = document.getElementById("respuesta").value.trim().toLowerCase();
+    const info = document.getElementById("info");
+    if (respuesta === coordActual) {
+      aciertos++;
+      info.style.color = 'green';
+	  juegoIniciado = false;
+      iniciarRonda();
+    } else {
+      fallos++;
+      info.style.color = 'red';
+      info.textContent = '❌ Incorrecto. Intenta de nuevo:';
+    }
+    actualizarStats();
+  }
+
+  function actualizarStats() {
+    document.getElementById("aciertos").textContent = aciertos;
+    document.getElementById("fallos").textContent = fallos;
+  }
+
+  document.getElementById("modo-juego").addEventListener('change', iniciarRonda);
+  document.getElementById("modo-vista").addEventListener('change', iniciarRonda);
+
+  iniciarRonda();
+  
+	document.addEventListener("keydown", function(event) {
+	  if (event.key === "Enter") {
+		event.preventDefault(); // Evita el comportamiento por defecto (como enviar formularios)
+		if (juegoIniciado) {
+			validarRespuesta();   // Llama a tu función de comprobación
+		}
+	  }
+	});
+</script>
+</body>
+</html>

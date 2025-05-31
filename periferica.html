@@ -299,7 +299,7 @@
 
     function comprobarRespuesta() {
       const entrada = document.getElementById("respuesta").value.trim().toLowerCase();
-      const esperado = respuestasCorrectas.join(' ').toLowerCase();
+      const esperado = respuestasCorrectas.join('').toLowerCase();
       const feedback = document.getElementById("feedback");
 
       if (entrada === esperado) {
